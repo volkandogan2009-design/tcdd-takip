@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCDD — Tren Takip Sistemi</title>
+<style>
+/* ─── RESET & ROOT ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:       #ffffff;
+  --bg2:      #f7f6f3;
+  --bg3:      #eeece7;
+  --tp:       #1a1a1a;
+  --ts:       #6b6b67;
+  --tt:       #9c9a90;
+  --br:       rgba(0,0,0,0.09);
+  --brm:      rgba(0,0,0,0.16);
+  --red:      #c0181e;
+  --red2:     #9e1317;
+  --blue:     #1a56b0;
+  --green:    #2e9e58;
+  --amber:    #d97706;
+  --rmd:      8px;
+  --rlg:      12px;
+  --rxl:      16px;
+  --font:     -apple-system, 'Segoe UI', 'Helvetica Neue', sans-serif;
+  --sidebar:  248px;
+  --topbar:   52px;
+  --nav:      48px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:  #1c1c1a; --bg2: #252523; --bg3: #2e2e2b;
+    --tp:  #e8e6e0; --ts:  #9c9a92; --tt:  #6b6964;
+    --br:  rgba(255,255,255,0.09); --brm: rgba(255,255,255,0.16);
+  }
+}
+
+html, body { height: 100%; }
+body { font-family: var(--font); background: var(--bg3); color: var(--tp); font-size: 13px; line-height: 1.4; }
+
+/* ─── APP SHELL ─── */
+.app { display: flex; flex-direction: column; height: 100vh; background: var(--bg); }
+
+/* ─── GLOBAL TOPBAR ─── */
+.topbar {
+  height: var(--topbar); flex-shrink: 0;
+  background: var(--bg); border-bottom: 0.5px solid var(--br);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px; z-index: 10;
+}
+.topbar-left  { display: flex; align-items: center; gap: 14px; }
+.topbar-right { display: flex; align-items: center; gap: 14px; }
+.logo { background: var(--red); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 4px; letter-spacing: 0.08em; }
+.app-title { font-size: 14px; font-weight: 500; color: var(--tp); }
+.dot-live { width: 7px; height: 7px; border-radius: 50%; background: var(--green); display: inline-block; animation: blink 1.4s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+.live-badge { font-size: 12px; color: var(--ts); display: flex; align-items: center; gap: 5px; }
+.clk { font-size: 12px; color: var(--ts); font-variant-numeric: tabular-nums; min-width: 56px; }
+.op-avatar { width: 28px; height: 28px; border-radius: 50%; background: #e6f1fb; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--blue); }
+.op-name { font-size: 12px; color: var(--ts); }
+
+/* ─── NAV TABS ─── */
+.nav {
+  height: var(--nav); flex-shrink: 0;
+  background: var(--bg); border-bottom: 0.5px solid var(--br);
+  display: flex; align-items: stretch; padding: 0 20px; gap: 0;
+}
+.nav-tab {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 18px; font-size: 13px; color: var(--ts);
+  cursor: pointer; border-bottom: 2px solid transparent;
+  transition: color .15s, border-color .15s; white-space: nowrap;
+  user-select: none;
+}
+.nav-tab:hover { color: var(--tp); }
+.nav-tab.active { color: var(--tp); border-bottom-color: var(--red); font-weight: 500; }
+.nav-tab .tab-icon { font-size: 15px; }
+.nav-badge { background: var(--red); color: #fff; font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 10px; }
+
+/* ─── CONTENT AREA ─── */
+.content { flex: 1; overflow: hidden; position: relative; }
+.page { display: none; height: 100%; overflow: hidden; }
+.page.active { display: flex; flex-direction: column; }
+
+/* ══════════════════════════════════════════
+   PAGE 1 — CANLI HARİTA
+══════════════════════════════════════════ */
+.map-layout { flex: 1; display: flex; overflow: hidden; }
+
+/* Sidebar */
+.map-sidebar { width: var(--sidebar); flex-shrink: 0; border-right: 0.5px solid var(--br); display: flex; flex-direction: column; background: var(--bg); }
+.sidebar-hdr { padding: 9px 14px; font-size: 10px; font-weight: 600; color: var(--ts); letter-spacing: 0.08em; text-transform: uppercase; border-bottom: 0.5px solid var(--br); }
+.train-list { flex: 1; overflow-y: auto; }
+.train-item { padding: 9px 14px; border-bottom: 0.5px solid var(--br); cursor: pointer; transition: background .12s; }
+.train-item:hover, .train-item.sel { background: var(--bg2); }
+.ti-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1px; }
+.ti-num { font-size: 13px; font-weight: 500; }
+.ti-spd { font-size: 11px; color: var(--ts); font-variant-numeric: tabular-nums; }
+.ti-route { font-size: 11px; color: var(--ts); margin-bottom: 3px; }
+.ti-status { display: flex; align-items: center; gap: 4px; font-size: 11px; }
+.sdot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.s-ok   { background: var(--green); }
+.s-late { background: var(--amber); }
+.s-stop { background: var(--red); }
+.c-ok   { color: var(--green); }
+.c-late { color: var(--amber); }
+.c-stop { color: var(--red); }
+
+/* Map canvas */
+.map-canvas { flex: 1; position: relative; background: #f5f4ef; overflow: hidden; }
+@media (prefers-color-scheme: dark) { .map-canvas { background: #28281f; } }
+.map-canvas svg { width: 100%; height: 100%; }
+
+.filter-bar { position: absolute; top: 12px; left: 12px; display: flex; gap: 6px; }
+.fchip { font-size: 11px; padding: 4px 10px; background: var(--bg); border: 0.5px solid var(--br); border-radius: 20px; cursor: pointer; color: var(--ts); transition: .15s; }
+.fchip.on { background: var(--red); color: #fff; border-color: var(--red); }
+
+.zoom-ctrl { position: absolute; top: 12px; right: 12px; display: flex; flex-direction: column; gap: 4px; }
+.zbtn { width: 30px; height: 30px; background: var(--bg); border: 0.5px solid var(--br); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; color: var(--tp); transition: background .12s; }
+.zbtn:hover { background: var(--bg2); }
+
+.info-card { position: absolute; bottom: 14px; left: 14px; width: 210px; background: var(--bg); border: 0.5px solid var(--br); border-radius: var(--rmd); padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.ic-title { font-size: 12px; font-weight: 500; margin-bottom: 8px; }
+.ic-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; }
+.ic-lbl { color: var(--ts); }
+.ic-val { font-weight: 500; }
+
+/* ══════════════════════════════════════════
+   PAGE 2 — SEFER ÇİZELGESİ
+══════════════════════════════════════════ */
+.sc-body { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
+
+.kpi-row { display: grid; grid-template-columns: repeat(4,1fr); border-bottom: 0.5px solid var(--br); flex-shrink: 0; }
+.kpi { padding: 13px 20px; border-right: 0.5px solid var(--br); }
+.kpi:last-child { border-right: none; }
+.kpi-lbl { font-size: 10px; color: var(--ts); margin-bottom: 3px; letter-spacing: 0.04em; text-transform: uppercase; }
+.kpi-val { font-size: 22px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.kpi-sub { font-size: 11px; color: var(--ts); margin-top: 2px; }
+
+.toolbar { padding: 9px 18px; display: flex; gap: 10px; align-items: center; border-bottom: 0.5px solid var(--br); flex-shrink: 0; }
+.search { flex:1; height:32px; border: 0.5px solid var(--brm); border-radius:6px; padding: 0 10px; font-size:13px; background: var(--bg2); color: var(--tp); outline:none; font-family: var(--font); }
+.search:focus { border-color: var(--red); }
+.seg { display:flex; border:0.5px solid var(--brm); border-radius:6px; overflow:hidden; }
+.sbtn { padding:5px 13px; font-size:12px; background: var(--bg); border:none; cursor:pointer; color: var(--ts); font-family: var(--font); transition:.12s; }
+.sbtn:hover { background: var(--bg2); }
+.sbtn.on { background: var(--bg2); color: var(--tp); font-weight:500; }
+
+.table-wrap { overflow: auto; flex: 1; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+thead tr { background: var(--bg2); position: sticky; top: 0; z-index: 2; }
+th { padding:8px 16px; text-align:left; font-size:10px; font-weight:600; color: var(--ts); letter-spacing:.05em; border-bottom:0.5px solid var(--br); text-transform:uppercase; white-space:nowrap; }
+td { padding:10px 16px; border-bottom:0.5px solid var(--br); vertical-align:middle; white-space:nowrap; }
+tr:hover td { background: var(--bg2); cursor:pointer; }
+
+.badge { display:inline-flex; align-items:center; gap:4px; font-size:11px; padding:3px 8px; border-radius:20px; font-weight:500; }
+.b-ok   { background:#d1fae5; color:#065f46; }
+.b-late { background:#fef3c7; color:#92400e; }
+.b-hlate{ background:#fee2e2; color:#991b1b; }
+.b-stop { background:#e0e7ff; color:#3730a3; }
+@media (prefers-color-scheme: dark) {
+  .b-ok   { background:#064e3b; color:#6ee7b7; }
+  .b-late { background:#451a03; color:#fcd34d; }
+  .b-hlate{ background:#450a0a; color:#fca5a5; }
+  .b-stop { background:#1e1b4b; color:#a5b4fc; }
+}
+.ty { border-radius:3px; padding:2px 6px; font-size:11px; font-weight:700; }
+.ty-yht { background:#fff0f0; color:var(--red); }
+.ty-ic  { background:#f0f4ff; color:var(--blue); }
+@media (prefers-color-scheme: dark) {
+  .ty-yht { background:#3b0a0b; color:#f87171; }
+  .ty-ic  { background:#0c1e3d; color:#93c5fd; }
+}
+.dbar-wrap { display:flex; align-items:center; gap:8px; }
+.dbar { height:4px; background:var(--br); border-radius:2px; width:64px; overflow:hidden; }
+.dfill { height:100%; border-radius:2px; }
+.pbar { height:4px; background:var(--br); border-radius:2px; width:72px; overflow:hidden; }
+.pfill { height:100%; background:var(--red); border-radius:2px; }
+.prow { display:flex; align-items:center; gap:8px; }
+.ppct { font-size:11px; color:var(--ts); }
+
+/* ══════════════════════════════════════════
+   PAGE 3 — OPERATÖR KONTROL MERKEZİ
+══════════════════════════════════════════ */
+.okm-body { flex:1; display:grid; grid-template-columns:1fr 290px; grid-template-rows:auto 1fr; overflow:hidden; background:var(--bg); }
+
+.okm-kpi { grid-column:1/-1; display:grid; grid-template-columns:repeat(5,1fr); border-bottom:0.5px solid var(--br); }
+.okm-kpi .kpi { padding:13px 18px; }
+
+.okm-main { border-right:0.5px solid var(--br); overflow-y:auto; }
+.sec-hdr { padding:9px 18px; font-size:10px; font-weight:600; color:var(--ts); letter-spacing:.06em; text-transform:uppercase; border-bottom:0.5px solid var(--br); display:flex; justify-content:space-between; align-items:center; }
+.sec-link { color:var(--blue); cursor:pointer; font-weight:400; font-size:11px; }
+
+/* Bar chart */
+.chart-wrap { padding:14px 18px; }
+.bars { display:flex; align-items:flex-end; gap:6px; height:110px; }
+.bgrp { display:flex; flex-direction:column; align-items:center; gap:3px; flex:1; }
+.bar { border-radius:3px 3px 0 0; width:100%; background:var(--red); transition:opacity .2s; }
+.bar:hover { opacity:.65; }
+.blbl { font-size:10px; color:var(--ts); }
+
+/* Spark bars */
+.sparks { padding:10px 18px 14px; }
+.spark-row { display:flex; align-items:center; gap:10px; margin-bottom:9px; }
+.slbl { font-size:12px; color:var(--ts); width:120px; flex-shrink:0; }
+.sbar { flex:1; height:7px; background:var(--br); border-radius:4px; overflow:hidden; }
+.sfill { height:100%; border-radius:4px; }
+.sval { font-size:12px; font-weight:500; width:36px; text-align:right; }
+
+/* Event list */
+.ev-list { overflow-y:auto; }
+.ev-item { padding:10px 18px; border-bottom:0.5px solid var(--br); display:flex; gap:10px; align-items:flex-start; cursor:pointer; transition:background .12s; }
+.ev-item:hover { background:var(--bg2); }
+.ev-dot { width:8px; height:8px; border-radius:50%; margin-top:4px; flex-shrink:0; }
+.ed-crit { background:var(--red); }
+.ed-warn { background:var(--amber); }
+.ed-info { background:var(--blue); }
+.ed-ok   { background:var(--green); }
+.ev-title { font-size:13px; margin-bottom:2px; }
+.ev-meta  { font-size:11px; color:var(--ts); }
+
+/* OKM Sidebar */
+.okm-sidebar { display:flex; flex-direction:column; overflow-y:auto; background:var(--bg); }
+.alarm-card { margin:13px 13px 0; background:var(--bg2); border-radius:var(--rmd); border:0.5px solid var(--br); padding:12px 14px; }
+.alarm-ttl { font-size:10px; font-weight:600; margin-bottom:9px; color:var(--ts); letter-spacing:.06em; text-transform:uppercase; }
+.al-row { display:flex; justify-content:space-between; align-items:center; padding:5px 0; border-bottom:0.5px solid var(--br); }
+.al-row:last-child { border-bottom:none; padding-bottom:0; }
+.al-lbl { font-size:12px; }
+.al-cnt { font-size:17px; font-weight:500; font-variant-numeric:tabular-nums; }
+.dlbl { padding:13px 13px 6px; font-size:10px; font-weight:600; color:var(--ts); letter-spacing:.06em; text-transform:uppercase; }
+.act-btn { margin:0 13px 7px; padding:9px 12px; border:0.5px solid var(--brm); border-radius:var(--rmd); font-size:13px; font-family:var(--font); background:var(--bg); color:var(--tp); cursor:pointer; display:flex; justify-content:space-between; align-items:center; transition:background .12s; }
+.act-btn:hover { background:var(--bg2); }
+.nbadge { background:var(--red); color:#fff; font-size:10px; border-radius:10px; padding:1px 6px; }
+.sys-section { margin:0 13px 13px; }
+.sys-row { display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:0.5px solid var(--br); }
+.sys-row:last-child { border-bottom:none; }
+.sys-lbl { font-size:12px; color:var(--ts); }
+.sys-val { font-size:12px; font-weight:500; }
+
+/* ══════════════════════════════════════════
+   PAGE 4 — RAPORLAMA
+══════════════════════════════════════════ */
+.rpr-body { flex:1; display:flex; flex-direction:column; overflow:hidden; background:var(--bg); }
+.rpr-toolbar { padding:10px 18px; display:flex; gap:10px; align-items:center; border-bottom:0.5px solid var(--br); flex-shrink:0; flex-wrap:wrap; }
+.rpr-toolbar .seg { display:flex; border:0.5px solid var(--brm); border-radius:6px; overflow:hidden; }
+.rpr-title { font-size:13px; font-weight:500; color:var(--ts); margin-right:4px; }
+.rpr-scroll { flex:1; overflow-y:auto; padding:16px 20px; display:flex; flex-direction:column; gap:16px; }
+
+/* KPI strip */
+.rpr-kpi { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
+.rpr-kpi-card { background:var(--bg2); border:0.5px solid var(--br); border-radius:var(--rlg); padding:14px 16px; }
+.rpr-kpi-lbl { font-size:10px; font-weight:600; color:var(--ts); text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px; }
+.rpr-kpi-val { font-size:24px; font-weight:500; font-variant-numeric:tabular-nums; }
+.rpr-kpi-sub { font-size:11px; color:var(--ts); margin-top:3px; }
+
+/* Chart cards */
+.rpr-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.rpr-card { background:var(--bg2); border:0.5px solid var(--br); border-radius:var(--rlg); padding:16px; }
+.rpr-card.full { grid-column:1/-1; }
+.rpr-card-hdr { font-size:11px; font-weight:600; color:var(--ts); text-transform:uppercase; letter-spacing:.06em; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; }
+.rpr-card-hdr span.badge-sm { font-size:10px; font-weight:500; padding:2px 7px; border-radius:10px; background:var(--bg3); color:var(--ts); text-transform:none; letter-spacing:0; }
+
+/* SVG Chart helpers */
+.chart-svg { width:100%; overflow:visible; }
+
+/* Line chart */
+.lc-axis text { font-size:10px; fill:var(--ts); font-family:var(--font); }
+.lc-grid line { stroke:var(--br); stroke-width:1; }
+.lc-line { fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.lc-dot { r:3; }
+
+/* Bar chart */
+.bc-bar { transition:opacity .15s; cursor:pointer; }
+.bc-bar:hover { opacity:.75; }
+.bc-axis text { font-size:10px; fill:var(--ts); font-family:var(--font); }
+
+/* Donut */
+.donut-center { font-size:22px; font-weight:500; font-family:var(--font); fill:var(--tp); }
+.donut-sub { font-size:11px; fill:var(--ts); font-family:var(--font); }
+.donut-legend { display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; justify-content:center; }
+.dl-item { display:flex; align-items:center; gap:5px; font-size:11px; color:var(--ts); }
+.dl-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+
+/* Hat performance table */
+.rpr-table { width:100%; border-collapse:collapse; font-size:12px; }
+.rpr-table th { text-align:left; padding:7px 12px; font-size:10px; font-weight:600; color:var(--ts); letter-spacing:.05em; text-transform:uppercase; border-bottom:0.5px solid var(--br); white-space:nowrap; }
+.rpr-table td { padding:9px 12px; border-bottom:0.5px solid var(--br); vertical-align:middle; white-space:nowrap; }
+.rpr-table tr:last-child td { border-bottom:none; }
+.rpr-table tr:hover td { background:var(--bg3); cursor:pointer; }
+.mini-bar { height:5px; border-radius:3px; background:var(--br); overflow:hidden; margin-top:4px; }
+.mini-fill { height:100%; border-radius:3px; }
+
+/* Export buttons */
+.export-row { display:flex; gap:8px; align-items:center; }
+.exp-btn { display:inline-flex; align-items:center; gap:6px; padding:6px 13px; font-size:12px; font-family:var(--font); border-radius:6px; border:0.5px solid var(--brm); background:var(--bg); color:var(--tp); cursor:pointer; transition:background .12s; }
+.exp-btn:hover { background:var(--bg2); }
+.exp-btn.primary { background:var(--red); color:#fff; border-color:var(--red); }
+.exp-btn.primary:hover { background:var(--red2); }
+
+/* Passenger heatmap */
+.heatmap-grid { display:grid; grid-template-columns:40px repeat(7,1fr); gap:3px; align-items:center; }
+.hm-lbl { font-size:10px; color:var(--ts); text-align:right; padding-right:6px; }
+.hm-cell { height:22px; border-radius:3px; transition:opacity .15s; cursor:pointer; position:relative; }
+.hm-cell:hover { opacity:.8; }
+.hm-col-lbl { font-size:10px; color:var(--ts); text-align:center; }
+
+/* ─── ANIMATIONS ─── */
+@keyframes moveTrain1 { 0%{offset-distance:0%} 100%{offset-distance:100%} }
+@keyframes moveTrain2 { 0%{offset-distance:20%} 100%{offset-distance:100%} }
+@keyframes moveTrain3 { 0%{offset-distance:55%} 100%{offset-distance:100%} }
+@keyframes moveTrain4 { 0%{offset-distance:10%} 100%{offset-distance:100%} }
+
+/* ─── SCROLLBARS ─── */
+::-webkit-scrollbar { width:5px; height:5px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--br); border-radius:3px; }
+::-webkit-scrollbar-thumb:hover { background:var(--brm); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ═══ GLOBAL TOPBAR ═══ -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="logo">TCDD</span>
+      <span class="app-title">Tren Takip Sistemi</span>
+    </div>
+    <div class="topbar-right">
+      <span class="live-badge"><span class="dot-live"></span> Canlı</span>
+      <span class="clk" id="clk">--:--:--</span>
+      <div class="op-avatar">AK</div>
+      <span class="op-name">Ahmet Kaya · Vardiya Şefi</span>
+    </div>
+  </header>
+
+  <!-- ═══ NAV TABS ═══ -->
+  <nav class="nav">
+    <div class="nav-tab active" data-page="map" onclick="goPage('map',this)">
+      <span class="tab-icon">🗺</span> Canlı Harita
+    </div>
+    <div class="nav-tab" data-page="schedule" onclick="goPage('schedule',this)">
+      <span class="tab-icon">📋</span> Sefer Çizelgesi
+    </div>
+    <div class="nav-tab" data-page="control" onclick="goPage('control',this)">
+      <span class="tab-icon">🖥</span> Kontrol Merkezi
+      <span class="nav-badge">5</span>
+    </div>
+  </nav>
+
+  <!-- ═══ CONTENT ═══ -->
+  <main class="content">
+
+    <!-- ──────────────────────────────────────
+         PAGE 1: CANLI HARİTA
+    ────────────────────────────────────── -->
+    <div class="page active" id="page-map">
+      <div class="map-layout">
+
+        <!-- Sidebar -->
+        <div class="map-sidebar">
+          <div class="sidebar-hdr">Aktif Seferler (12)</div>
+          <div class="train-list">
+            <div class="train-item sel" onclick="selTrain(this,'YHT 10501','ANK → İST','287 km/s','Eskişehir','11:24','Zamanında','ok')">
+              <div class="ti-top"><span class="ti-num">YHT 10501</span><span class="ti-spd">287 km/s</span></div>
+              <div class="ti-route">Ankara → İstanbul</div>
+              <div class="ti-status"><span class="sdot s-ok"></span><span class="c-ok">Zamanında</span></div>
+            </div>
+            <div class="train-item" onclick="selTrain(this,'YHT 10602','İST → KON','241 km/s','Afyon','12:45','+8 dk gecikmeli','late')">
+              <div class="ti-top"><span class="ti-num">YHT 10602</span><span class="ti-spd">241 km/s</span></div>
+              <div class="ti-route">İstanbul → Konya</div>
+              <div class="ti-status"><span class="sdot s-late"></span><span class="c-late">+8 dk gecikmeli</span></div>
+            </div>
+            <div class="train-item" onclick="selTrain(this,'IC 534','İZM → ANK','163 km/s','Afyonkarahisar','10:52','Zamanında','ok')">
+              <div class="ti-top"><span class="ti-num">IC 534</span><span class="ti-spd">163 km/s</span></div>
+              <div class="ti-route">İzmir → Ankara</div>
+              <div class="ti-status"><span class="sdot s-ok"></span><span class="c-ok">Zamanında</span></div>
+            </div>
+            <div class="train-item" onclick="selTrain(this,'YHT 10703','ANK → SİV','0 km/s','Ankara','—','İstasyon duruşu','stop')">
+              <div class="ti-top"><span class="ti-num">YHT 10703</span><span class="ti-spd">0 km/s</span></div>
+              <div class="ti-route">Ankara → Sivas</div>
+              <div class="ti-status"><span class="sdot s-stop"></span><span class="c-stop">İstasyon duruşu</span></div>
+            </div>
+            <div class="train-item" onclick="selTrain(this,'IC 410','ADA → İST','118 km/s','Konya','15:30','+22 dk gecikmeli','late')">
+              <div class="ti-top"><span class="ti-num">IC 410</span><span class="ti-spd">118 km/s</span></div>
+              <div class="ti-route">Adana → İstanbul</div>
+              <div class="ti-status"><span class="sdot s-late"></span><span class="c-late">+22 dk gecikmeli</span></div>
+            </div>
+            <div class="train-item" onclick="selTrain(this,'YHT 10801','ANK → ESK','310 km/s','Eskişehir','10:05','Zamanında','ok')">
+              <div class="ti-top"><span class="ti-num">YHT 10801</span><span class="ti-spd">310 km/s</span></div>
+              <div class="ti-route">Ankara → Eskişehir</div>
+              <div class="ti-status"><span class="sdot s-ok"></span><span class="c-ok">Zamanında</span></div>
+            </div>
+            <div class="train-item" onclick="selTrain(this,'IC 322','KAR → ANK','98 km/s','Erzincan','11:15','Zamanında','ok')">
+              <div class="ti-top"><span class="ti-num">IC 322</span><span class="ti-spd">98 km/s</span></div>
+              <div class="ti-route">Kars → Ankara</div>
+              <div class="ti-status"><span class="sdot s-ok"></span><span class="c-ok">Zamanında</span></div>
+            </div>
+            <div class="train-item" onclick="selTrain(this,'YHT 10902','ESK → ANK','298 km/s','Ankara','10:48','Zamanında','ok')">
+              <div class="ti-top"><span class="ti-num">YHT 10902</span><span class="ti-spd">298 km/s</span></div>
+              <div class="ti-route">Eskişehir → Ankara</div>
+              <div class="ti-status"><span class="sdot s-ok"></span><span class="c-ok">Zamanında</span></div>
+            </div>
+            <div class="train-item" onclick="selTrain(this,'IC 201','ANK → ADA','144 km/s','Kayseri','13:22','+5 dk gecikmeli','late')">
+              <div class="ti-top"><span class="ti-num">IC 201</span><span class="ti-spd">144 km/s</span></div>
+              <div class="ti-route">Ankara → Adana</div>
+              <div class="ti-status"><span class="sdot s-late"></span><span class="c-late">+5 dk gecikmeli</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Map -->
+        <div class="map-canvas">
+          <svg viewBox="0 0 852 580" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+            <!-- Grid -->
+            <g stroke="#dedad2" stroke-width="0.5" opacity="0.6">
+              <line x1="0" y1="72" x2="852" y2="72"/><line x1="0" y1="144" x2="852" y2="144"/>
+              <line x1="0" y1="216" x2="852" y2="216"/><line x1="0" y1="288" x2="852" y2="288"/>
+              <line x1="0" y1="360" x2="852" y2="360"/><line x1="0" y1="432" x2="852" y2="432"/>
+              <line x1="0" y1="504" x2="852" y2="504"/>
+              <line x1="106" y1="0" x2="106" y2="580"/><line x1="212" y1="0" x2="212" y2="580"/>
+              <line x1="318" y1="0" x2="318" y2="580"/><line x1="424" y1="0" x2="424" y2="580"/>
+              <line x1="530" y1="0" x2="530" y2="580"/><line x1="636" y1="0" x2="636" y2="580"/>
+              <line x1="742" y1="0" x2="742" y2="580"/>
+            </g>
+            <!-- Rail lines -->
+            <path d="M426 295 Q350 255 278 235 Q204 215 138 192" stroke="#bbb8b0" stroke-width="3" fill="none"/>
+            <path d="M138 192 Q168 255 192 318 Q212 368 236 428" stroke="#bbb8b0" stroke-width="3" fill="none"/>
+            <path d="M426 295 Q492 268 554 250 Q616 232 672 222" stroke="#bbb8b0" stroke-width="2.5" fill="none"/>
+            <path d="M426 295 Q380 272 330 258 Q284 244 216 238" stroke="#c0181e" stroke-width="2.5" fill="none" opacity="0.4"/>
+            <path d="M100 385 Q192 355 258 340 Q340 320 426 295" stroke="#bbb8b0" stroke-width="2.5" fill="none"/>
+            <path d="M426 295 Q448 350 460 400 Q470 445 478 490" stroke="#bbb8b0" stroke-width="2" fill="none"/>
+            <path d="M426 295 Q520 280 608 265 Q688 252 756 240" stroke="#bbb8b0" stroke-width="2" fill="none"/>
+            <!-- Stations -->
+            <circle cx="426" cy="295" r="8" fill="#c0181e" stroke="white" stroke-width="2"/>
+            <text x="436" y="290" fill="#444" font-size="12" font-family="-apple-system,sans-serif" font-weight="500">Ankara</text>
+            <circle cx="138" cy="192" r="7" fill="#1a56b0" stroke="white" stroke-width="2"/>
+            <text x="148" y="188" fill="#444" font-size="12" font-family="-apple-system,sans-serif" font-weight="500">İstanbul</text>
+            <circle cx="216" cy="238" r="5" fill="#777" stroke="white" stroke-width="1.5"/>
+            <text x="224" y="234" fill="#666" font-size="11" font-family="-apple-system,sans-serif">Eskişehir</text>
+            <circle cx="236" cy="428" r="5" fill="#777" stroke="white" stroke-width="1.5"/>
+            <text x="244" y="424" fill="#666" font-size="11" font-family="-apple-system,sans-serif">Konya</text>
+            <circle cx="672" cy="222" r="5" fill="#777" stroke="white" stroke-width="1.5"/>
+            <text x="680" y="218" fill="#666" font-size="11" font-family="-apple-system,sans-serif">Sivas</text>
+            <circle cx="100" cy="385" r="5" fill="#777" stroke="white" stroke-width="1.5"/>
+            <text x="108" y="381" fill="#666" font-size="11" font-family="-apple-system,sans-serif">İzmir</text>
+            <circle cx="478" cy="490" r="5" fill="#777" stroke="white" stroke-width="1.5"/>
+            <text x="486" y="486" fill="#666" font-size="11" font-family="-apple-system,sans-serif">Adana</text>
+            <circle cx="756" cy="240" r="5" fill="#777" stroke="white" stroke-width="1.5"/>
+            <text x="762" y="236" fill="#666" font-size="11" font-family="-apple-system,sans-serif">Kars</text>
+            <!-- Animated trains -->
+            <g style="offset-path:path('M426 295 Q350 255 278 235 Q204 215 138 192');offset-distance:40%;animation:moveTrain1 9s linear infinite;">
+              <rect x="-15" y="-7" width="30" height="14" rx="3" fill="#c0181e"/>
+              <text x="0" y="5" text-anchor="middle" fill="white" font-size="8" font-weight="700" font-family="-apple-system,sans-serif">10501</text>
+            </g>
+            <g style="offset-path:path('M100 385 Q192 355 258 340 Q340 320 426 295');offset-distance:60%;animation:moveTrain2 11s linear infinite;">
+              <rect x="-13" y="-7" width="26" height="14" rx="3" fill="#1a56b0"/>
+              <text x="0" y="5" text-anchor="middle" fill="white" font-size="8" font-weight="700" font-family="-apple-system,sans-serif">IC534</text>
+            </g>
+            <g style="offset-path:path('M426 295 Q380 272 330 258 Q284 244 216 238');offset-distance:30%;animation:moveTrain3 7s linear infinite;">
+              <rect x="-13" y="-7" width="26" height="14" rx="3" fill="#c0181e"/>
+              <text x="0" y="5" text-anchor="middle" fill="white" font-size="8" font-weight="700" font-family="-apple-system,sans-serif">10801</text>
+            </g>
+            <g style="offset-path:path('M756 240 Q688 252 608 265 Q520 280 426 295');offset-distance:70%;animation:moveTrain4 14s linear infinite;">
+              <rect x="-12" y="-7" width="24" height="14" rx="3" fill="#555"/>
+              <text x="0" y="5" text-anchor="middle" fill="white" font-size="8" font-weight="700" font-family="-apple-system,sans-serif">IC322</text>
+            </g>
+          </svg>
+
+          <div class="filter-bar">
+            <span class="fchip on" onclick="togFilter(this)">Tümü</span>
+            <span class="fchip" onclick="togFilter(this)">YHT</span>
+            <span class="fchip" onclick="togFilter(this)">IC</span>
+            <span class="fchip" onclick="togFilter(this)">Bölgesel</span>
+          </div>
+          <div class="zoom-ctrl">
+            <div class="zbtn">+</div>
+            <div class="zbtn">−</div>
+            <div class="zbtn" style="font-size:12px">⊕</div>
+          </div>
+          <div class="info-card">
+            <div class="ic-title" id="ic-title">YHT 10501 — Seçili</div>
+            <div class="ic-row"><span class="ic-lbl">Güzergah</span><span class="ic-val" id="ic-route">ANK → İST</span></div>
+            <div class="ic-row"><span class="ic-lbl">Hız</span><span class="ic-val" id="ic-speed">287 km/s</span></div>
+            <div class="ic-row"><span class="ic-lbl">Sonraki İst.</span><span class="ic-val" id="ic-next">Eskişehir</span></div>
+            <div class="ic-row"><span class="ic-lbl">Tahmini Varış</span><span class="ic-val" id="ic-arr">11:24</span></div>
+            <div class="ic-row"><span class="ic-lbl">Durum</span><span class="ic-val" id="ic-stat" style="color:var(--green)">Zamanında</span></div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /page-map -->
+
+    <!-- ──────────────────────────────────────
+         PAGE 2: SEFER ÇİZELGESİ
+    ────────────────────────────────────── -->
+    <div class="page" id="page-schedule">
+      <div class="sc-body">
+        <div class="kpi-row">
+          <div class="kpi"><div class="kpi-lbl">Toplam Sefer</div><div class="kpi-val">48</div><div class="kpi-sub">Bugün planlanan</div></div>
+          <div class="kpi"><div class="kpi-lbl">Zamanında</div><div class="kpi-val" style="color:var(--green)">31</div><div class="kpi-sub">%64.6 başarı</div></div>
+          <div class="kpi"><div class="kpi-lbl">Gecikmeli</div><div class="kpi-val" style="color:var(--amber)">14</div><div class="kpi-sub">Ort. +18 dk</div></div>
+          <div class="kpi"><div class="kpi-lbl">İptal / Duran</div><div class="kpi-val" style="color:var(--red)">3</div><div class="kpi-sub">Müdahale gerekli</div></div>
+        </div>
+        <div class="toolbar">
+          <input class="search" placeholder="Sefer no, hat veya istasyon ara..." type="text"/>
+          <div class="seg">
+            <button class="sbtn on" onclick="togSeg(this)">Tümü</button>
+            <button class="sbtn" onclick="togSeg(this)">Gecikmeli</button>
+            <button class="sbtn" onclick="togSeg(this)">YHT</button>
+            <button class="sbtn" onclick="togSeg(this)">IC</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Sefer No</th><th>Tür</th><th>Güzergah</th>
+                <th>Planlı Kalkış</th><th>Gerçekleşen</th>
+                <th>Gecikme</th><th>İlerleme</th><th>Durum</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight:500">YHT 10501</td><td><span class="ty ty-yht">YHT</span></td><td>Ankara → İstanbul</td><td>08:00</td><td>08:00</td>
+                <td><div class="dbar-wrap"><span style="font-size:12px;color:var(--green);font-weight:500;min-width:44px">0 dk</span><div class="dbar"><div class="dfill" style="width:0%;background:var(--green)"></div></div></div></td>
+                <td><div class="prow"><div class="pbar"><div class="pfill" style="width:72%"></div></div><span class="ppct">72%</span></div></td>
+                <td><span class="badge b-ok">● Zamanında</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight:500">YHT 10602</td><td><span class="ty ty-yht">YHT</span></td><td>İstanbul → Konya</td><td>07:30</td><td>07:38</td>
+                <td><div class="dbar-wrap"><span style="font-size:12px;color:var(--amber);font-weight:500;min-width:44px">+8 dk</span><div class="dbar"><div class="dfill" style="width:27%;background:var(--amber)"></div></div></div></td>
+                <td><div class="prow"><div class="pbar"><div class="pfill" style="width:55%"></div></div><span class="ppct">55%</span></div></td>
+                <td><span class="badge b-late">⚠ Gecikmeli</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight:500">IC 534</td><td><span class="ty ty-ic">IC</span></td><td>İzmir → Ankara</td><td>06:45</td><td>06:45</td>
+                <td><div class="dbar-wrap"><span style="font-size:12px;color:var(--green);font-weight:500;min-width:44px">0 dk</span><div class="dbar"><div class="dfill" style="width:0%;background:var(--green)"></div></div></div></td>
+                <td><div class="prow"><div class="pbar"><div class="pfill" style="width:88%"></div></div><span class="ppct">88%</span></div></td>
+                <td><span class="badge b-ok">● Zamanında</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight:500">IC 410</td><td><span class="ty ty-ic">IC</span></td><td>Adana → İstanbul</td><td>05:10</td><td>05:32</td>
+                <td><div class="dbar-wrap"><span style="font-size:12px;color:var(--red);font-weight:500;min-width:44px">+22 dk</span><div class="dbar"><div class="dfill" style="width:73%;background:var(--red)"></div></div></div></td>
+                <td><div class="prow"><div class="pbar"><div class="pfill" style="width:41%"></div></div><span class="ppct">41%</span></div></td>
+                <td><span class="badge b-hlate">✕ Yüksek Gecikme</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight:500">YHT 10703</td><td><span class="ty ty-yht">YHT</span></td><td>Ankara → Sivas</td><td>09:00</td><td>—</td>
+                <td><span style="font-size:12px;color:#5b5bd6;font-weight:500">İstasyon duruşu</span></td>
+                <td><div class="prow"><div class="pbar"><div class="pfill" style="width:18%"></div></div><span class="ppct">18%</span></div></td>
+                <td><span class="badge b-stop">◼ Durduruldu</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight:500">YHT 10801</td><td><span class="ty ty-yht">YHT</span></td><td>Ankara → Eskişehir</td><td>09:15</td><td>09:15</td>
+                <td><div class="dbar-wrap"><span style="font-size:12px;color:var(--green);font-weight:500;min-width:44px">0 dk</span><div class="dbar"><div class="dfill" style="width:0%;background:var(--green)"></div></div></div></td>
+                <td><div class="prow"><div class="pbar"><div class="pfill" style="width:30%"></div></div><span class="ppct">30%</span></div></td>
+                <td><span class="badge b-ok">● Zamanında</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight:500">IC 322</td><td><span class="ty ty-ic">IC</span></td><td>Kars → Ankara</td><td>04:00</td><td>04:05</td>
+                <td><div class="dbar-wrap"><span style="font-size:12px;color:var(--amber);font-weight:500;min-width:44px">+5 dk</span><div class="dbar"><div class="dfill" style="width:17%;background:var(--amber)"></div></div></div></td>
+                <td><div class="prow"><div class="pbar"><div class="pfill" style="width:93%"></div></div><span class="ppct">93%</span></div></td>
+                <td><span class="badge b-late">⚠ Gecikmeli</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight:500">YHT 10902</td><td><span class="ty ty-yht">YHT</span></td><td>Eskişehir → Ankara</td><td>09:00</td><td>09:00</td>
+                <td><div class="dbar-wrap"><span style="font-size:12px;color:var(--green);font-weight:500;min-width:44px">0 dk</span><div class="dbar"><div class="dfill" style="width:0%;background:var(--green)"></div></div></div></td>
+                <td><div class="prow"><div class="pbar"><div class="pfill" style="width:50%"></div></div><span class="ppct">50%</span></div></td>
+                <td><span class="badge b-ok">● Zamanında</span></td>
+              </tr>
+              <tr>
+                <td style="font-weight:500">IC 201</td><td><span class="ty ty-ic">IC</span></td><td>Ankara → Adana</td><td>08:30</td><td>08:35</td>
+                <td><div class="dbar-wrap"><span style="font-size:12px;color:var(--amber);font-weight:500;min-width:44px">+5 dk</span><div class="dbar"><div class="dfill" style="width:17%;background:var(--amber)"></div></div></div></td>
+                <td><div class="prow"><div class="pbar"><div class="pfill" style="width:38%"></div></div><span class="ppct">38%</span></div></td>
+                <td><span class="badge b-late">⚠ Gecikmeli</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /page-schedule -->
+
+    <!-- ──────────────────────────────────────
+         PAGE 3: OPERATÖR KONTROL MERKEZİ
+    ────────────────────────────────────── -->
+    <div class="page" id="page-control">
+      <div class="okm-body">
+
+        <!-- KPI strip -->
+        <div class="okm-kpi">
+          <div class="kpi"><div class="kpi-lbl">Aktif Tren</div><div class="kpi-val">12</div><div class="kpi-sub" style="color:var(--green)">↑ 3 son saatten fazla</div></div>
+          <div class="kpi"><div class="kpi-lbl">Ort. Gecikme</div><div class="kpi-val">+8 dk</div><div class="kpi-sub" style="color:var(--amber)">↑ Dünden +2 dk</div></div>
+          <div class="kpi"><div class="kpi-lbl">Dakiklik Oranı</div><div class="kpi-val">64.6%</div><div class="kpi-sub" style="color:var(--red)">↓ Hedef %85</div></div>
+          <div class="kpi"><div class="kpi-lbl">Aktif Alarm</div><div class="kpi-val" style="color:var(--red)">5</div><div class="kpi-sub" style="color:var(--red)">2 kritik</div></div>
+          <div class="kpi"><div class="kpi-lbl">Yolcu Sayısı</div><div class="kpi-val">4.812</div><div class="kpi-sub" style="color:var(--green)">↑ %6 artış</div></div>
+        </div>
+
+        <!-- Main -->
+        <div class="okm-main">
+          <div class="sec-hdr"><span>Saatlik Sefer Performansı</span><span style="font-size:11px;color:var(--ts)">Son 8 saat</span></div>
+          <div class="chart-wrap">
+            <div class="bars">
+              <div class="bgrp"><div class="bar" style="height:64px;opacity:.72"></div><div class="blbl">02</div></div>
+              <div class="bgrp"><div class="bar" style="height:46px;opacity:.60"></div><div class="blbl">03</div></div>
+              <div class="bgrp"><div class="bar" style="height:78px;opacity:.78"></div><div class="blbl">04</div></div>
+              <div class="bgrp"><div class="bar" style="height:96px;opacity:.88"></div><div class="blbl">05</div></div>
+              <div class="bgrp"><div class="bar" style="height:86px;opacity:.82"></div><div class="blbl">06</div></div>
+              <div class="bgrp"><div class="bar" style="height:108px"></div><div class="blbl">07</div></div>
+              <div class="bgrp"><div class="bar" style="height:92px;opacity:.88"></div><div class="blbl">08</div></div>
+              <div class="bgrp"><div class="bar" style="height:70px;opacity:.68"></div><div class="blbl">09</div></div>
+            </div>
+            <div style="margin-top:9px;font-size:11px;color:var(--ts);display:flex;align-items:center;gap:6px">
+              <span style="display:inline-block;width:10px;height:10px;background:var(--red);border-radius:2px"></span>
+              Sefer sayısı (saatlik)
+            </div>
+          </div>
+
+          <div class="sec-hdr"><span>Hat Doluluk Oranları</span></div>
+          <div class="sparks">
+            <div class="spark-row"><span class="slbl">Ankara – İstanbul</span><div class="sbar"><div class="sfill" style="width:92%;background:var(--red)"></div></div><span class="sval">%92</span></div>
+            <div class="spark-row"><span class="slbl">İstanbul – Konya</span><div class="sbar"><div class="sfill" style="width:78%;background:var(--amber)"></div></div><span class="sval">%78</span></div>
+            <div class="spark-row"><span class="slbl">İzmir – Ankara</span><div class="sbar"><div class="sfill" style="width:65%;background:var(--blue)"></div></div><span class="sval">%65</span></div>
+            <div class="spark-row"><span class="slbl">Ankara – Sivas</span><div class="sbar"><div class="sfill" style="width:44%;background:#888"></div></div><span class="sval">%44</span></div>
+            <div class="spark-row"><span class="slbl">Adana – İstanbul</span><div class="sbar"><div class="sfill" style="width:81%;background:var(--amber)"></div></div><span class="sval">%81</span></div>
+            <div class="spark-row"><span class="slbl">Kars – Ankara</span><div class="sbar"><div class="sfill" style="width:52%;background:var(--blue)"></div></div><span class="sval">%52</span></div>
+          </div>
+
+          <div class="sec-hdr"><span>Son Olaylar</span><a class="sec-link">Tümünü gör →</a></div>
+          <div class="ev-list">
+            <div class="ev-item"><span class="ev-dot ed-crit"></span><div><div class="ev-title">IC 410 — Yüksek gecikme (+22 dk) tespit edildi</div><div class="ev-meta">09:38 · Konya bölgesi · Müdahale bekleniyor</div></div></div>
+            <div class="ev-item"><span class="ev-dot ed-warn"></span><div><div class="ev-title">YHT 10703 Ankara İstasyonu'nda beklemede</div><div class="ev-meta">09:22 · Planlı duruşu aşıldı</div></div></div>
+            <div class="ev-item"><span class="ev-dot ed-info"></span><div><div class="ev-title">YHT 10602 Eskişehir'den kalktı</div><div class="ev-meta">09:14 · +8 dk gecikmeli · Konya'ya tahmini varış 12:45</div></div></div>
+            <div class="ev-item"><span class="ev-dot ed-ok"></span><div><div class="ev-title">IC 534 İzmir'den zamanında kalkış</div><div class="ev-meta">06:45 · Sistem otomatik onayladı</div></div></div>
+            <div class="ev-item"><span class="ev-dot ed-warn"></span><div><div class="ev-title">Hat 3 sinyalizasyon gecikmesi — 45 sn</div><div class="ev-meta">09:05 · Bakım ekibine bildirildi</div></div></div>
+            <div class="ev-item"><span class="ev-dot ed-ok"></span><div><div class="ev-title">YHT 10801 Ankara'dan zamanında kalkış</div><div class="ev-meta">09:15 · Sistem otomatik onayladı</div></div></div>
+          </div>
+        </div>
+
+        <!-- OKM Sidebar -->
+        <div class="okm-sidebar">
+          <div class="alarm-card">
+            <div class="alarm-ttl">Aktif Alarmlar</div>
+            <div class="al-row"><span class="al-lbl">Kritik</span><span class="al-cnt" style="color:var(--red)">2</span></div>
+            <div class="al-row"><span class="al-lbl">Uyarı</span><span class="al-cnt" style="color:var(--amber)">3</span></div>
+            <div class="al-row"><span class="al-lbl">Bilgi</span><span class="al-cnt" style="color:var(--blue)">7</span></div>
+          </div>
+          <div class="dlbl">Hızlı Eylemler</div>
+          <button class="act-btn">Duyuru Yayınla <span>→</span></button>
+          <button class="act-btn">Sefer Yönlendir <span>→</span></button>
+          <button class="act-btn">Bakım Ekibi Çağır <span>→</span></button>
+          <button class="act-btn">Acil Durdur <span class="nbadge">!</span></button>
+          <div class="dlbl" style="margin-top:4px">Sistem Durumu</div>
+          <div class="sys-section">
+            <div class="sys-row"><span class="sys-lbl">GPS / GNSS</span><span class="sys-val" style="color:var(--green)">Aktif</span></div>
+            <div class="sys-row"><span class="sys-lbl">GSM-R İletişim</span><span class="sys-val" style="color:var(--green)">Aktif</span></div>
+            <div class="sys-row"><span class="sys-lbl">ETCS Sinyalizasyon</span><span class="sys-val" style="color:var(--amber)">Kısmi</span></div>
+            <div class="sys-row"><span class="sys-lbl">Merkez Sunucu</span><span class="sys-val" style="color:var(--green)">%99.8</span></div>
+            <div class="sys-row"><span class="sys-lbl">Yedek Sunucu</span><span class="sys-val" style="color:var(--green)">Hazır</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /page-control -->
+
+
+    <!-- ──────────────────────────────────────
+         PAGE 4: RAPORLAMA
+    ────────────────────────────────────── -->
+    <div class="page" id="page-report">
+      <div class="rpr-body">
+
+        <!-- Toolbar -->
+        <div class="rpr-toolbar">
+          <span class="rpr-title">Dönem:</span>
+          <div class="seg">
+            <button class="sbtn on" onclick="togSeg(this);loadReport(this)">Bugün</button>
+            <button class="sbtn" onclick="togSeg(this);loadReport(this)">Bu Hafta</button>
+            <button class="sbtn" onclick="togSeg(this);loadReport(this)">Bu Ay</button>
+            <button class="sbtn" onclick="togSeg(this);loadReport(this)">Son 3 Ay</button>
+          </div>
+          <div style="margin-left:auto" class="export-row">
+            <button class="exp-btn" onclick="exportCSV()">⬇ CSV İndir</button>
+            <button class="exp-btn primary" onclick="exportPDF()">⬇ PDF Rapor</button>
+          </div>
+        </div>
+
+        <!-- Scrollable body -->
+        <div class="rpr-scroll" id="rpr-scroll">
+
+          <!-- KPI strip -->
+          <div class="rpr-kpi">
+            <div class="rpr-kpi-card">
+              <div class="rpr-kpi-lbl">Toplam Sefer</div>
+              <div class="rpr-kpi-val" id="rk-total">48</div>
+              <div class="rpr-kpi-sub">Bugün planlanan</div>
+            </div>
+            <div class="rpr-kpi-card">
+              <div class="rpr-kpi-lbl">Dakiklik Oranı</div>
+              <div class="rpr-kpi-val" id="rk-punct" style="color:var(--amber)">64.6%</div>
+              <div class="rpr-kpi-sub" style="color:var(--red)">↓ Hedef %85</div>
+            </div>
+            <div class="rpr-kpi-card">
+              <div class="rpr-kpi-lbl">Ort. Gecikme</div>
+              <div class="rpr-kpi-val" id="rk-delay" style="color:var(--amber)">+8 dk</div>
+              <div class="rpr-kpi-sub" style="color:var(--amber)">↑ Dünden +2 dk</div>
+            </div>
+            <div class="rpr-kpi-card">
+              <div class="rpr-kpi-lbl">Toplam Yolcu</div>
+              <div class="rpr-kpi-val" id="rk-pax">4.812</div>
+              <div class="rpr-kpi-sub" style="color:var(--green)">↑ %6 artış</div>
+            </div>
+            <div class="rpr-kpi-card">
+              <div class="rpr-kpi-lbl">İptal / Duruş</div>
+              <div class="rpr-kpi-val" id="rk-cancel" style="color:var(--red)">3</div>
+              <div class="rpr-kpi-sub">Müdahale edildi</div>
+            </div>
+          </div>
+
+          <!-- Charts row -->
+          <div class="rpr-grid">
+
+            <!-- Dakiklik Trendi (Line Chart) -->
+            <div class="rpr-card">
+              <div class="rpr-card-hdr">Saatlik Dakiklik Trendi <span class="badge-sm">Son 12 saat</span></div>
+              <svg class="chart-svg" viewBox="0 0 340 130" id="lineChart">
+                <!-- Grid lines -->
+                <g class="lc-grid">
+                  <line x1="40" y1="10" x2="330" y2="10"/>
+                  <line x1="40" y1="35" x2="330" y2="35"/>
+                  <line x1="40" y1="60" x2="330" y2="60"/>
+                  <line x1="40" y1="85" x2="330" y2="85"/>
+                  <line x1="40" y1="110" x2="330" y2="110"/>
+                </g>
+                <!-- Y labels -->
+                <g class="lc-axis">
+                  <text x="35" y="14" text-anchor="end">100%</text>
+                  <text x="35" y="39" text-anchor="end">75%</text>
+                  <text x="35" y="64" text-anchor="end">50%</text>
+                  <text x="35" y="89" text-anchor="end">25%</text>
+                  <text x="35" y="114" text-anchor="end">0%</text>
+                </g>
+                <!-- Line: Zamanında oranı -->
+                <polyline class="lc-line" stroke="#2e9e58"
+                  points="40,45 67,38 94,52 121,30 148,55 175,42 202,60 229,35 256,28 283,50 310,38 330,32"/>
+                <!-- Dots -->
+                <g fill="#2e9e58">
+                  <circle class="lc-dot" cx="40" cy="45"/><circle class="lc-dot" cx="67" cy="38"/>
+                  <circle class="lc-dot" cx="94" cy="52"/><circle class="lc-dot" cx="121" cy="30"/>
+                  <circle class="lc-dot" cx="148" cy="55"/><circle class="lc-dot" cx="175" cy="42"/>
+                  <circle class="lc-dot" cx="202" cy="60"/><circle class="lc-dot" cx="229" cy="35"/>
+                  <circle class="lc-dot" cx="256" cy="28"/><circle class="lc-dot" cx="283" cy="50"/>
+                  <circle class="lc-dot" cx="310" cy="38"/><circle class="lc-dot" cx="330" cy="32"/>
+                </g>
+                <!-- Target line -->
+                <line x1="40" y1="22" x2="330" y2="22" stroke="#d97706" stroke-width="1.5" stroke-dasharray="5,4"/>
+                <text x="332" y="26" font-size="9" fill="#d97706" font-family="-apple-system,sans-serif">Hedef</text>
+                <!-- X labels -->
+                <g class="lc-axis">
+                  <text x="40" y="125" text-anchor="middle">21</text>
+                  <text x="94" y="125" text-anchor="middle">23</text>
+                  <text x="148" y="125" text-anchor="middle">01</text>
+                  <text x="202" y="125" text-anchor="middle">03</text>
+                  <text x="256" y="125" text-anchor="middle">05</text>
+                  <text x="310" y="125" text-anchor="middle">07</text>
+                </g>
+              </svg>
+            </div>
+
+            <!-- Gecikme Dağılımı (Donut) -->
+            <div class="rpr-card" style="display:flex;flex-direction:column;align-items:center;">
+              <div class="rpr-card-hdr" style="width:100%">Sefer Durum Dağılımı</div>
+              <svg viewBox="0 0 140 140" width="140" height="140">
+                <!-- Donut segments (stroke-dasharray = segment, gap) circumference=263 -->
+                <circle cx="70" cy="70" r="42" fill="none" stroke="#e5e5e5" stroke-width="22"/>
+                <!-- Zamanında: 64.6% = 170 -->
+                <circle cx="70" cy="70" r="42" fill="none" stroke="#2e9e58" stroke-width="22"
+                  stroke-dasharray="170 263" stroke-dashoffset="66" transform="rotate(-90 70 70)"/>
+                <!-- Gecikmeli: 29.2% = 77 -->
+                <circle cx="70" cy="70" r="42" fill="none" stroke="#d97706" stroke-width="22"
+                  stroke-dasharray="77 263" stroke-dashoffset="-104" transform="rotate(-90 70 70)"/>
+                <!-- İptal: 6.2% = 16 -->
+                <circle cx="70" cy="70" r="42" fill="none" stroke="#c0181e" stroke-width="22"
+                  stroke-dasharray="16 263" stroke-dashoffset="-181" transform="rotate(-90 70 70)"/>
+                <text class="donut-center" x="70" y="66" text-anchor="middle">64.6%</text>
+                <text class="donut-sub" x="70" y="80" text-anchor="middle">Dakiklik</text>
+              </svg>
+              <div class="donut-legend">
+                <div class="dl-item"><div class="dl-dot" style="background:#2e9e58"></div>Zamanında (31)</div>
+                <div class="dl-item"><div class="dl-dot" style="background:#d97706"></div>Gecikmeli (14)</div>
+                <div class="dl-item"><div class="dl-dot" style="background:#c0181e"></div>İptal/Dur (3)</div>
+              </div>
+            </div>
+
+            <!-- Gecikme Sebepler Bar Chart -->
+            <div class="rpr-card">
+              <div class="rpr-card-hdr">Gecikme Sebepleri <span class="badge-sm">Dakika bazlı</span></div>
+              <svg class="chart-svg" viewBox="0 0 320 150">
+                <g class="bc-axis">
+                  <!-- Bars -->
+                  <rect class="bc-bar" x="30" y="20" width="34" height="85" rx="3" fill="#c0181e"/>
+                  <rect class="bc-bar" x="80" y="45" width="34" height="60" rx="3" fill="#d97706"/>
+                  <rect class="bc-bar" x="130" y="65" width="34" height="40" rx="3" fill="#1a56b0"/>
+                  <rect class="bc-bar" x="180" y="80" width="34" height="25" rx="3" fill="#1a56b0"/>
+                  <rect class="bc-bar" x="230" y="90" width="34" height="15" rx="3" fill="#1a56b0"/>
+                  <!-- Values -->
+                  <text x="47" y="16" text-anchor="middle" font-size="10" fill="#c0181e" font-family="-apple-system,sans-serif" font-weight="600">+22dk</text>
+                  <text x="97" y="41" text-anchor="middle" font-size="10" fill="#d97706" font-family="-apple-system,sans-serif" font-weight="600">+16dk</text>
+                  <text x="147" y="61" text-anchor="middle" font-size="10" fill="#1a56b0" font-family="-apple-system,sans-serif" font-weight="600">+10dk</text>
+                  <text x="197" y="76" text-anchor="middle" font-size="10" fill="#1a56b0" font-family="-apple-system,sans-serif" font-weight="600">+6dk</text>
+                  <text x="247" y="86" text-anchor="middle" font-size="10" fill="#1a56b0" font-family="-apple-system,sans-serif" font-weight="600">+4dk</text>
+                  <!-- Baseline -->
+                  <line x1="20" y1="105" x2="290" y2="105" stroke-width="0.5" stroke="#ccc"/>
+                  <!-- Labels -->
+                  <text x="47" y="118" text-anchor="middle" font-size="9" font-family="-apple-system,sans-serif">Teknik</text>
+                  <text x="97" y="118" text-anchor="middle" font-size="9" font-family="-apple-system,sans-serif">Yolcu</text>
+                  <text x="147" y="118" text-anchor="middle" font-size="9" font-family="-apple-system,sans-serif">Trafik</text>
+                  <text x="197" y="118" text-anchor="middle" font-size="9" font-family="-apple-system,sans-serif">Hava</text>
+                  <text x="247" y="118" text-anchor="middle" font-size="9" font-family="-apple-system,sans-serif">Diğer</text>
+                </g>
+              </svg>
+            </div>
+
+            <!-- Yolcu Saatlik Yoğunluk Heatmap -->
+            <div class="rpr-card">
+              <div class="rpr-card-hdr">Yolcu Yoğunluğu <span class="badge-sm">Saate göre</span></div>
+              <div id="heatmap" style="margin-top:6px"></div>
+              <div style="margin-top:10px;display:flex;align-items:center;gap:6px;font-size:10px;color:var(--ts);">
+                <span>Az</span>
+                <div style="height:8px;width:80px;border-radius:4px;background:linear-gradient(to right,#e6f4ec,#2e9e58)"></div>
+                <span>Çok</span>
+              </div>
+            </div>
+
+          </div><!-- /rpr-grid -->
+
+          <!-- Hat Performans Tablosu -->
+          <div class="rpr-card full">
+            <div class="rpr-card-hdr">Hat Bazlı Performans Tablosu</div>
+            <table class="rpr-table">
+              <thead>
+                <tr>
+                  <th>Hat</th>
+                  <th>Sefer Sayısı</th>
+                  <th>Zamanında</th>
+                  <th>Dakiklik %</th>
+                  <th>Ort. Gecikme</th>
+                  <th>Yolcu</th>
+                  <th>Doluluk</th>
+                  <th>Trend</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="font-weight:500">Ankara → İstanbul</td>
+                  <td>14</td>
+                  <td style="color:var(--green)">11</td>
+                  <td>
+                    <div>%78.6</div>
+                    <div class="mini-bar"><div class="mini-fill" style="width:78.6%;background:var(--amber)"></div></div>
+                  </td>
+                  <td style="color:var(--amber)">+9 dk</td>
+                  <td>1.842</td>
+                  <td><div>%92</div><div class="mini-bar"><div class="mini-fill" style="width:92%;background:var(--red)"></div></div></td>
+                  <td style="color:var(--green);font-size:12px">↑ İyi</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500">İstanbul → Konya</td>
+                  <td>8</td>
+                  <td style="color:var(--amber)">5</td>
+                  <td>
+                    <div>%62.5</div>
+                    <div class="mini-bar"><div class="mini-fill" style="width:62.5%;background:var(--amber)"></div></div>
+                  </td>
+                  <td style="color:var(--red)">+14 dk</td>
+                  <td>964</td>
+                  <td><div>%78</div><div class="mini-bar"><div class="mini-fill" style="width:78%;background:var(--amber)"></div></div></td>
+                  <td style="color:var(--amber);font-size:12px">→ Orta</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500">İzmir → Ankara</td>
+                  <td>6</td>
+                  <td style="color:var(--green)">5</td>
+                  <td>
+                    <div>%83.3</div>
+                    <div class="mini-bar"><div class="mini-fill" style="width:83.3%;background:var(--green)"></div></div>
+                  </td>
+                  <td style="color:var(--green)">+3 dk</td>
+                  <td>712</td>
+                  <td><div>%65</div><div class="mini-bar"><div class="mini-fill" style="width:65%;background:var(--blue)"></div></div></td>
+                  <td style="color:var(--green);font-size:12px">↑ İyi</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500">Adana → İstanbul</td>
+                  <td>5</td>
+                  <td style="color:var(--red)">2</td>
+                  <td>
+                    <div>%40.0</div>
+                    <div class="mini-bar"><div class="mini-fill" style="width:40%;background:var(--red)"></div></div>
+                  </td>
+                  <td style="color:var(--red)">+22 dk</td>
+                  <td>618</td>
+                  <td><div>%81</div><div class="mini-bar"><div class="mini-fill" style="width:81%;background:var(--amber)"></div></div></td>
+                  <td style="color:var(--red);font-size:12px">↓ Kritik</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500">Ankara → Sivas</td>
+                  <td>4</td>
+                  <td style="color:var(--amber)">3</td>
+                  <td>
+                    <div>%75.0</div>
+                    <div class="mini-bar"><div class="mini-fill" style="width:75%;background:var(--amber)"></div></div>
+                  </td>
+                  <td style="color:var(--amber)">+7 dk</td>
+                  <td>389</td>
+                  <td><div>%44</div><div class="mini-bar"><div class="mini-fill" style="width:44%;background:var(--blue)"></div></div></td>
+                  <td style="color:var(--ts);font-size:12px">→ Normal</td>
+                </tr>
+                <tr>
+                  <td style="font-weight:500">Kars → Ankara</td>
+                  <td>4</td>
+                  <td style="color:var(--amber)">3</td>
+                  <td>
+                    <div>%75.0</div>
+                    <div class="mini-bar"><div class="mini-fill" style="width:75%;background:var(--amber)"></div></div>
+                  </td>
+                  <td style="color:var(--amber)">+5 dk</td>
+                  <td>287</td>
+                  <td><div>%52</div><div class="mini-bar"><div class="mini-fill" style="width:52%;background:var(--blue)"></div></div></td>
+                  <td style="color:var(--ts);font-size:12px">→ Normal</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div><!-- /rpr-scroll -->
+      </div>
+    </div><!-- /page-report -->
+
+  </main>
+</div>
+
+<script>
+  // ─── Clock ───
+  function tick() {
+    document.getElementById('clk').textContent = new Date().toTimeString().slice(0,8);
+  }
+  setInterval(tick, 1000); tick();
+
+  // ─── Page navigation ───
+  function goPage(id, tab) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    tab.classList.add('active');
+  }
+
+  // ─── Map: train selection ───
+  function selTrain(el, name, route, speed, next, arr, status, state) {
+    document.querySelectorAll('.train-item').forEach(i => i.classList.remove('sel'));
+    el.classList.add('sel');
+    document.getElementById('ic-title').textContent  = name + ' — Seçili';
+    document.getElementById('ic-route').textContent  = route;
+    document.getElementById('ic-speed').textContent  = speed;
+    document.getElementById('ic-next').textContent   = next;
+    document.getElementById('ic-arr').textContent    = arr;
+    const st = document.getElementById('ic-stat');
+    st.textContent   = status;
+    st.style.color   = state === 'ok' ? 'var(--green)' : state === 'late' ? 'var(--amber)' : 'var(--red)';
+  }
+
+  // ─── Map: filter chips ───
+  function togFilter(el) {
+    document.querySelectorAll('.fchip').forEach(c => c.classList.remove('on'));
+    el.classList.add('on');
+  }
+
+  // ─── Schedule: segment buttons ───
+  function togSeg(el) {
+    el.closest('.seg').querySelectorAll('.sbtn').forEach(b => b.classList.remove('on'));
+    el.classList.add('on');
+  }
+
+  // ─── Report: Heatmap ───
+  (function buildHeatmap() {
+    const hours = ['00','02','04','06','08','10','12','14','16','18','20','22'];
+    const routes = ['ANK→İST','İST→KON','İZM→ANK','ADA→İST','ANK→SİV','KAR→ANK'];
+    // Intensity data (0-1) for each route × hour
+    const data = [
+      [.1,.05,.2,.7,.95,.85,.75,.88,.92,.80,.60,.30],
+      [.05,.02,.1,.5,.80,.72,.65,.70,.78,.65,.50,.20],
+      [.08,.03,.15,.6,.70,.60,.55,.62,.65,.58,.42,.18],
+      [.12,.04,.18,.55,.75,.68,.60,.72,.80,.70,.52,.22],
+      [.04,.02,.08,.4,.55,.48,.45,.50,.44,.38,.30,.12],
+      [.03,.01,.06,.3,.45,.40,.35,.42,.38,.32,.25,.10],
+    ];
+    const colors = (v) => {
+      const r = Math.round(46 + (192-46)*(1-v));
+      const g = Math.round(158 + (24-158)*(1-v));
+      const b = Math.round(88 + (30-88)*(1-v));
+      return `rgb(${r},${g},${b})`;
+    };
+    let html = '<div class="heatmap-grid">';
+    // col labels
+    html += '<div class="hm-lbl"></div>';
+    for (const h of hours) html += `<div class="hm-col-lbl">${h}:00</div>`;
+    // rows
+    for (let r=0;r<routes.length;r++) {
+      html += `<div class="hm-lbl">${routes[r]}</div>`;
+      for (let c=0;c<hours.length;c++) {
+        const v = data[r][c];
+        const pax = Math.round(v*300);
+        html += `<div class="hm-cell" style="background:${colors(v)}" title="${routes[r]} ${hours[c]}:00 — ${pax} yolcu"></div>`;
+      }
+    }
+    html += '</div>';
+    const el = document.getElementById('heatmap');
+    if (el) el.innerHTML = html;
+  })();
+
+  // ─── Report: Period data ───
+  const periodData = {
+    'Bugün':    { total:'48', punct:'64.6%', delay:'+8 dk', pax:'4.812', cancel:'3' },
+    'Bu Hafta': { total:'312', punct:'71.2%', delay:'+6 dk', pax:'31.480', cancel:'14' },
+    'Bu Ay':    { total:'1.344', punct:'74.8%', delay:'+5 dk', pax:'138.200', cancel:'52' },
+    'Son 3 Ay': { total:'4.032', punct:'76.1%', delay:'+4 dk', pax:'412.800', cancel:'141' },
+  };
+  function loadReport(btn) {
+    const key = btn.textContent.trim();
+    const d = periodData[key];
+    if (!d) return;
+    document.getElementById('rk-total').textContent  = d.total;
+    document.getElementById('rk-punct').textContent  = d.punct;
+    document.getElementById('rk-delay').textContent  = d.delay;
+    document.getElementById('rk-pax').textContent    = d.pax;
+    document.getElementById('rk-cancel').textContent = d.cancel;
+  }
+
+  // ─── CSV Export ───
+  function exportCSV() {
+    const rows = [
+      ['Hat','Sefer Sayısı','Zamanında','Dakiklik %','Ort. Gecikme','Yolcu','Doluluk'],
+      ['Ankara→İstanbul','14','11','78.6%','+9 dk','1842','%92'],
+      ['İstanbul→Konya','8','5','62.5%','+14 dk','964','%78'],
+      ['İzmir→Ankara','6','5','83.3%','+3 dk','712','%65'],
+      ['Adana→İstanbul','5','2','40.0%','+22 dk','618','%81'],
+      ['Ankara→Sivas','4','3','75.0%','+7 dk','389','%44'],
+      ['Kars→Ankara','4','3','75.0%','+5 dk','287','%52'],
+    ];
+    const csv = rows.map(r => r.map(c => '"'+c+'"').join(',')).join('\n');
+    const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = 'tcdd_rapor.csv'; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ─── PDF Export (print) ───
+  function exportPDF() {
+    window.print();
+  }
+
+</script>
+</body>
+</html>
