@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <title>TCDD — Tren Takip Sistemi</title>
 <style>
 /* ─── RESET & ROOT ─── */
@@ -109,9 +111,9 @@ body { font-family: var(--font); background: var(--bg3); color: var(--tp); font-
 .c-stop { color: var(--red); }
 
 /* Map canvas */
-.map-canvas { flex: 1; position: relative; background: #f5f4ef; overflow: hidden; }
-@media (prefers-color-scheme: dark) { .map-canvas { background: #28281f; } }
-.map-canvas svg { width: 100%; height: 100%; }
+.map-canvas { flex: 1; position: relative; overflow: hidden; }
+#leaflet-map { width: 100%; height: 100%; }
+.leaflet-container { background: #f5f4ef; font-family: var(--font); }
 
 .filter-bar { position: absolute; top: 12px; left: 12px; display: flex; gap: 6px; }
 .fchip { font-size: 11px; padding: 4px 10px; background: var(--bg); border: 0.5px solid var(--br); border-radius: 20px; cursor: pointer; color: var(--ts); transition: .15s; }
@@ -411,6 +413,12 @@ tr:hover td { background: var(--bg2); cursor:pointer; }
 .save-btn { padding:8px 20px; background:var(--blue); color:#fff; border:none; border-radius:6px; font-size:13px; font-family:var(--font); cursor:pointer; font-weight:500; transition:opacity .15s; }
 .save-btn:hover { opacity:.88; }
 
+
+/* Leaflet özel stiller */
+.station-label { background:transparent !important; border:none !important; box-shadow:none !important; }
+.train-tooltip { background:rgba(26,26,26,0.85); border:none; color:#fff; font-size:11px; padding:4px 8px; border-radius:4px; }
+.leaflet-attribution-flag { display:none; }
+
 /* ─── ANIMATIONS ─── */
 @keyframes moveTrain1 { 0%{offset-distance:0%} 100%{offset-distance:100%} }
 @keyframes moveTrain2 { 0%{offset-distance:20%} 100%{offset-distance:100%} }
@@ -524,72 +532,13 @@ tr:hover td { background: var(--bg2); cursor:pointer; }
 
         <!-- Map -->
         <div class="map-canvas">
-          <svg viewBox="0 0 852 580" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
-            <!-- Grid -->
-            <g stroke="#dedad2" stroke-width="0.5" opacity="0.6">
-              <line x1="0" y1="72" x2="852" y2="72"/><line x1="0" y1="144" x2="852" y2="144"/>
-              <line x1="0" y1="216" x2="852" y2="216"/><line x1="0" y1="288" x2="852" y2="288"/>
-              <line x1="0" y1="360" x2="852" y2="360"/><line x1="0" y1="432" x2="852" y2="432"/>
-              <line x1="0" y1="504" x2="852" y2="504"/>
-              <line x1="106" y1="0" x2="106" y2="580"/><line x1="212" y1="0" x2="212" y2="580"/>
-              <line x1="318" y1="0" x2="318" y2="580"/><line x1="424" y1="0" x2="424" y2="580"/>
-              <line x1="530" y1="0" x2="530" y2="580"/><line x1="636" y1="0" x2="636" y2="580"/>
-              <line x1="742" y1="0" x2="742" y2="580"/>
-            </g>
-            <!-- Rail lines -->
-            <path d="M426 295 Q350 255 278 235 Q204 215 138 192" stroke="#bbb8b0" stroke-width="3" fill="none"/>
-            <path d="M138 192 Q168 255 192 318 Q212 368 236 428" stroke="#bbb8b0" stroke-width="3" fill="none"/>
-            <path d="M426 295 Q492 268 554 250 Q616 232 672 222" stroke="#bbb8b0" stroke-width="2.5" fill="none"/>
-            <path d="M426 295 Q380 272 330 258 Q284 244 216 238" stroke="#c0181e" stroke-width="2.5" fill="none" opacity="0.4"/>
-            <path d="M100 385 Q192 355 258 340 Q340 320 426 295" stroke="#bbb8b0" stroke-width="2.5" fill="none"/>
-            <path d="M426 295 Q448 350 460 400 Q470 445 478 490" stroke="#bbb8b0" stroke-width="2" fill="none"/>
-            <path d="M426 295 Q520 280 608 265 Q688 252 756 240" stroke="#bbb8b0" stroke-width="2" fill="none"/>
-            <!-- Stations -->
-            <circle cx="426" cy="295" r="8" fill="#c0181e" stroke="white" stroke-width="2"/>
-            <text x="436" y="290" fill="#444" font-size="12" font-family="-apple-system,sans-serif" font-weight="500">Ankara</text>
-            <circle cx="138" cy="192" r="7" fill="#1a56b0" stroke="white" stroke-width="2"/>
-            <text x="148" y="188" fill="#444" font-size="12" font-family="-apple-system,sans-serif" font-weight="500">İstanbul</text>
-            <circle cx="216" cy="238" r="5" fill="#777" stroke="white" stroke-width="1.5"/>
-            <text x="224" y="234" fill="#666" font-size="11" font-family="-apple-system,sans-serif">Eskişehir</text>
-            <circle cx="236" cy="428" r="5" fill="#777" stroke="white" stroke-width="1.5"/>
-            <text x="244" y="424" fill="#666" font-size="11" font-family="-apple-system,sans-serif">Konya</text>
-            <circle cx="672" cy="222" r="5" fill="#777" stroke="white" stroke-width="1.5"/>
-            <text x="680" y="218" fill="#666" font-size="11" font-family="-apple-system,sans-serif">Sivas</text>
-            <circle cx="100" cy="385" r="5" fill="#777" stroke="white" stroke-width="1.5"/>
-            <text x="108" y="381" fill="#666" font-size="11" font-family="-apple-system,sans-serif">İzmir</text>
-            <circle cx="478" cy="490" r="5" fill="#777" stroke="white" stroke-width="1.5"/>
-            <text x="486" y="486" fill="#666" font-size="11" font-family="-apple-system,sans-serif">Adana</text>
-            <circle cx="756" cy="240" r="5" fill="#777" stroke="white" stroke-width="1.5"/>
-            <text x="762" y="236" fill="#666" font-size="11" font-family="-apple-system,sans-serif">Kars</text>
-            <!-- Animated trains -->
-            <g style="offset-path:path('M426 295 Q350 255 278 235 Q204 215 138 192');offset-distance:40%;animation:moveTrain1 9s linear infinite;">
-              <rect x="-15" y="-7" width="30" height="14" rx="3" fill="#c0181e"/>
-              <text x="0" y="5" text-anchor="middle" fill="white" font-size="8" font-weight="700" font-family="-apple-system,sans-serif">10501</text>
-            </g>
-            <g style="offset-path:path('M100 385 Q192 355 258 340 Q340 320 426 295');offset-distance:60%;animation:moveTrain2 11s linear infinite;">
-              <rect x="-13" y="-7" width="26" height="14" rx="3" fill="#1a56b0"/>
-              <text x="0" y="5" text-anchor="middle" fill="white" font-size="8" font-weight="700" font-family="-apple-system,sans-serif">IC534</text>
-            </g>
-            <g style="offset-path:path('M426 295 Q380 272 330 258 Q284 244 216 238');offset-distance:30%;animation:moveTrain3 7s linear infinite;">
-              <rect x="-13" y="-7" width="26" height="14" rx="3" fill="#c0181e"/>
-              <text x="0" y="5" text-anchor="middle" fill="white" font-size="8" font-weight="700" font-family="-apple-system,sans-serif">10801</text>
-            </g>
-            <g style="offset-path:path('M756 240 Q688 252 608 265 Q520 280 426 295');offset-distance:70%;animation:moveTrain4 14s linear infinite;">
-              <rect x="-12" y="-7" width="24" height="14" rx="3" fill="#555"/>
-              <text x="0" y="5" text-anchor="middle" fill="white" font-size="8" font-weight="700" font-family="-apple-system,sans-serif">IC322</text>
-            </g>
-          </svg>
+          <div id="leaflet-map"></div>
 
           <div class="filter-bar">
-            <span class="fchip on" onclick="togFilter(this)">Tümü</span>
-            <span class="fchip" onclick="togFilter(this)">YHT</span>
-            <span class="fchip" onclick="togFilter(this)">IC</span>
-            <span class="fchip" onclick="togFilter(this)">Bölgesel</span>
-          </div>
-          <div class="zoom-ctrl">
-            <div class="zbtn">+</div>
-            <div class="zbtn">−</div>
-            <div class="zbtn" style="font-size:12px">⊕</div>
+            <span class="fchip on" onclick="togFilter(this,'all')">Tümü</span>
+            <span class="fchip" onclick="togFilter(this,'YHT')">YHT</span>
+            <span class="fchip" onclick="togFilter(this,'IC')">IC</span>
+            <span class="fchip" onclick="togFilter(this,'REG')">Bölgesel</span>
           </div>
           <div class="info-card">
             <div class="ic-title" id="ic-title">YHT 10501 — Seçili</div>
@@ -1434,9 +1383,10 @@ asyncio.run(send_telemetry())</textarea>
     document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
     document.getElementById('page-' + id).classList.add('active');
     tab.classList.add('active');
-  if (id === 'settings') setTimeout(initSettings, 50);
+    if (id === 'settings') setTimeout(initSettings, 50);
   }
-  // ─── Map: train selection ───
+
+  // ─── Map: train selection (sidebar click) ───
   function selTrain(el, name, route, speed, next, arr, status, state) {
     document.querySelectorAll('.train-item').forEach(i => i.classList.remove('sel'));
     el.classList.add('sel');
@@ -1448,13 +1398,29 @@ asyncio.run(send_telemetry())</textarea>
     const st = document.getElementById('ic-stat');
     st.textContent   = status;
     st.style.color   = state === 'ok' ? 'var(--green)' : state === 'late' ? 'var(--amber)' : 'var(--red)';
+    // Haritada trenin üzerine git
+    if (trainMarkers && trainMarkers[name]) {
+      map.panTo(trainMarkers[name].getLatLng(), { animate: true });
+    }
   }
 
   // ─── Map: filter chips ───
-  function togFilter(el) {
+  function togFilter(el, type) {
     document.querySelectorAll('.fchip').forEach(c => c.classList.remove('on'));
     el.classList.add('on');
+    if (typeof TRAINS_DATA === 'undefined') return;
+    TRAINS_DATA.forEach(train => {
+      const marker = trainMarkers[train.id];
+      if (!marker) return;
+      if (!type || type === 'all' || train.type === type) {
+        marker.addTo(map);
+      } else {
+        marker.remove();
+      }
+    });
   }
+
+  // togFilter Leaflet bölümünde tanımlı
 
   // ─── Schedule: segment buttons ───
   function togSeg(el) {
@@ -1540,6 +1506,338 @@ asyncio.run(send_telemetry())</textarea>
   function exportPDF() {
     window.print();
   }
+
+  // ════════════════════════════════════════════
+  //   LEAFLET HARİTA — TCDD GERÇEK KOORDİNATLAR
+  // ════════════════════════════════════════════
+
+  // İstasyon koordinatları (gerçek)
+  const STATIONS = {
+    'İstanbul':    [41.0082, 28.9784],
+    'Eskişehir':   [39.7767, 30.5206],
+    'Ankara':      [39.9208, 32.8541],
+    'Konya':       [37.8746, 32.4932],
+    'İzmir':       [38.4192, 27.1287],
+    'Afyonkarahisar': [38.7507, 30.5567],
+    'Kayseri':     [38.7312, 35.4787],
+    'Sivas':       [39.7477, 37.0179],
+    'Adana':       [37.0017, 35.3289],
+    'Kars':        [40.6013, 43.0975],
+    'Erzincan':    [39.7500, 39.5000],
+    'Malatya':     [38.3552, 38.3095],
+    'Divriği':     [39.3722, 38.1194],
+    'Nişantaşı-Halkalı': [41.0422, 28.8167],
+    'Pendik':      [40.8776, 29.2630],
+  };
+
+  // Hat tanımları (YHT ve ana IC hatları - gerçek güzergahlar)
+  const LINES = [
+    {
+      id: 'ankara-istanbul-yht',
+      name: 'Ankara–İstanbul YHT',
+      type: 'YHT',
+      color: '#c0181e',
+      weight: 4,
+      coords: [
+        [39.9208, 32.8541], // Ankara
+        [39.9608, 32.6541], // Sincan
+        [39.8767, 32.4932], // Polatlı
+        [39.7767, 30.5206], // Eskişehir
+        [40.0500, 29.5000], // Bilecik
+        [40.1900, 29.0600], // Bozüyük
+        [40.7500, 29.9500], // İzmit
+        [40.9700, 29.3500], // Gebze
+        [40.9800, 29.1000], // Pendik
+        [41.0082, 28.9784], // İstanbul (Halkalı)
+      ]
+    },
+    {
+      id: 'ankara-konya-yht',
+      name: 'Ankara–Konya YHT',
+      type: 'YHT',
+      color: '#c0181e',
+      weight: 4,
+      coords: [
+        [39.9208, 32.8541], // Ankara
+        [39.5000, 32.8000], // Gölbaşı
+        [38.9500, 32.8600], // Haymana
+        [38.3500, 32.5000], // Cihanbeyli
+        [37.8746, 32.4932], // Konya
+      ]
+    },
+    {
+      id: 'istanbul-konya-yht',
+      name: 'İstanbul–Konya YHT',
+      type: 'YHT',
+      color: '#c0181e',
+      weight: 3,
+      dashArray: '8,4',
+      coords: [
+        [41.0082, 28.9784], // İstanbul
+        [39.7767, 30.5206], // Eskişehir
+        [38.7507, 30.5567], // Afyonkarahisar
+        [37.8746, 32.4932], // Konya
+      ]
+    },
+    {
+      id: 'ankara-sivas-yht',
+      name: 'Ankara–Sivas YHT',
+      type: 'YHT',
+      color: '#e67e22',
+      weight: 4,
+      coords: [
+        [39.9208, 32.8541], // Ankara
+        [39.9500, 33.5000], // Kırıkkale
+        [39.9300, 34.1600], // Yerköy
+        [39.9000, 34.8000], // Yozgat
+        [39.8000, 35.6000], // Sivas (yaklaşım)
+        [39.7477, 37.0179], // Sivas
+      ]
+    },
+    {
+      id: 'izmir-ankara-ic',
+      name: 'İzmir–Ankara IC',
+      type: 'IC',
+      color: '#1a56b0',
+      weight: 3,
+      coords: [
+        [38.4192, 27.1287], // İzmir
+        [38.5000, 27.9000], // Manisa
+        [38.7507, 30.5567], // Afyonkarahisar
+        [39.7767, 30.5206], // Eskişehir
+        [39.9208, 32.8541], // Ankara
+      ]
+    },
+    {
+      id: 'adana-istanbul-ic',
+      name: 'Adana–İstanbul IC',
+      type: 'IC',
+      color: '#1a56b0',
+      weight: 3,
+      coords: [
+        [37.0017, 35.3289], // Adana
+        [37.5750, 36.9228], // Maraş
+        [38.3552, 38.3095], // Malatya
+        [38.7312, 35.4787], // Kayseri
+        [38.7507, 30.5567], // Afyonkarahisar
+        [39.7767, 30.5206], // Eskişehir
+        [41.0082, 28.9784], // İstanbul
+      ]
+    },
+    {
+      id: 'kars-ankara-ic',
+      name: 'Kars–Ankara IC',
+      type: 'IC',
+      color: '#555',
+      weight: 2.5,
+      coords: [
+        [40.6013, 43.0975], // Kars
+        [39.9044, 41.2695], // Erzurum
+        [39.7500, 39.5000], // Erzincan
+        [39.7477, 37.0179], // Sivas
+        [39.5500, 36.5000], // Divriği
+        [38.3552, 38.3095], // Malatya
+        [38.7312, 35.4787], // Kayseri
+        [39.9208, 32.8541], // Ankara
+      ]
+    },
+    {
+      id: 'ankara-adana-ic',
+      name: 'Ankara–Adana IC',
+      type: 'IC',
+      color: '#1a56b0',
+      weight: 2.5,
+      dashArray: '6,3',
+      coords: [
+        [39.9208, 32.8541], // Ankara
+        [38.7312, 35.4787], // Kayseri
+        [37.8750, 36.2000], // Adana yaklaşım
+        [37.0017, 35.3289], // Adana
+      ]
+    },
+  ];
+
+  // Hareketli tren verileri
+  const TRAINS_DATA = [
+    { id: 'YHT 10501', type: 'YHT', line: 'ankara-istanbul-yht', progress: 0.42, speed: 287, route: 'ANK → İST', next: 'Eskişehir', arr: '11:24', status: 'ok', label: 'Zamanında', color: '#c0181e' },
+    { id: 'YHT 10602', type: 'YHT', line: 'istanbul-konya-yht', progress: 0.55, speed: 241, route: 'İST → KON', next: 'Afyon', arr: '12:45', status: 'late', label: '+8 dk gecikmeli', color: '#d97706' },
+    { id: 'IC 534',    type: 'IC',  line: 'izmir-ankara-ic',   progress: 0.65, speed: 163, route: 'İZM → ANK', next: 'Afyonkarahisar', arr: '10:52', status: 'ok', label: 'Zamanında', color: '#1a56b0' },
+    { id: 'YHT 10703', type: 'YHT', line: 'ankara-sivas-yht',  progress: 0.08, speed: 0,   route: 'ANK → SİV', next: 'Ankara', arr: '—', status: 'stop', label: 'İstasyon duruşu', color: '#888' },
+    { id: 'IC 410',    type: 'IC',  line: 'adana-istanbul-ic', progress: 0.38, speed: 118, route: 'ADA → İST', next: 'Konya', arr: '15:30', status: 'late', label: '+22 dk gecikmeli', color: '#d97706' },
+    { id: 'YHT 10801', type: 'YHT', line: 'ankara-istanbul-yht', progress: 0.18, speed: 310, route: 'ANK → ESK', next: 'Eskişehir', arr: '10:05', status: 'ok', label: 'Zamanında', color: '#c0181e' },
+    { id: 'IC 322',    type: 'IC',  line: 'kars-ankara-ic',   progress: 0.72, speed: 98,  route: 'KAR → ANK', next: 'Erzincan', arr: '11:15', status: 'ok', label: 'Zamanında', color: '#555' },
+    { id: 'IC 201',    type: 'IC',  line: 'ankara-adana-ic',  progress: 0.45, speed: 144, route: 'ANK → ADA', next: 'Kayseri', arr: '13:22', status: 'late', label: '+5 dk gecikmeli', color: '#d97706' },
+    { id: 'YHT 10902', type: 'YHT', line: 'ankara-istanbul-yht', progress: 0.78, speed: 298, route: 'ESK → ANK', next: 'Ankara', arr: '10:48', status: 'ok', label: 'Zamanında', color: '#c0181e' },
+  ];
+
+  let map, trainMarkers = {}, trainProgressMap = {}, animFrame;
+
+  function interpolateOnLine(coords, progress) {
+    const totalSegments = coords.length - 1;
+    const pos = progress * totalSegments;
+    const seg = Math.min(Math.floor(pos), totalSegments - 1);
+    const t = pos - seg;
+    const a = coords[seg], b = coords[seg + 1];
+    return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+  }
+
+  function makeTrainIcon(train) {
+    const statusColor = train.status === 'ok' ? '#2e9e58' : train.status === 'late' ? '#d97706' : '#c0181e';
+    const bg = train.type === 'YHT' ? '#c0181e' : '#1a56b0';
+    return L.divIcon({
+      className: '',
+      html: `<div style="
+        background:${bg};color:#fff;padding:2px 7px;border-radius:4px;
+        font-size:10px;font-weight:700;white-space:nowrap;
+        font-family:-apple-system,sans-serif;
+        box-shadow:0 2px 6px rgba(0,0,0,0.35);
+        border:2px solid ${statusColor};
+        cursor:pointer;
+      ">${train.id.replace('YHT ','').replace('IC ','IC')}</div>`,
+      iconAnchor: [20, 10],
+    });
+  }
+
+  function makeStationIcon(isHub) {
+    return L.divIcon({
+      className: '',
+      html: `<div style="
+        width:${isHub?14:10}px;height:${isHub?14:10}px;
+        background:${isHub?'#c0181e':'#fff'};
+        border:2.5px solid ${isHub?'#fff':'#666'};
+        border-radius:50%;
+        box-shadow:0 1px 4px rgba(0,0,0,0.3);
+      "></div>`,
+      iconAnchor: [isHub?7:5, isHub?7:5],
+    });
+  }
+
+  function initMap() {
+    if (map) return;
+
+    map = L.map('leaflet-map', {
+      center: [39.0, 35.5],
+      zoom: 6,
+      zoomControl: false,
+      attributionControl: true,
+    });
+
+    // OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>',
+      maxZoom: 13,
+      minZoom: 5,
+    }).addTo(map);
+
+    // Zoom kontrolü sağ tarafa
+    L.control.zoom({ position: 'topright' }).addTo(map);
+
+    // Hatları çiz
+    LINES.forEach(line => {
+      const poly = L.polyline(line.coords, {
+        color: line.color,
+        weight: line.weight || 3,
+        opacity: 0.85,
+        dashArray: line.dashArray || null,
+        lineJoin: 'round',
+      }).addTo(map);
+      poly.bindTooltip(`<b>${line.name}</b>`, { sticky: true, className: 'train-tooltip' });
+    });
+
+    // İstasyonları ekle
+    Object.entries(STATIONS).forEach(([name, coords]) => {
+      const isHub = ['İstanbul','Ankara','İzmir','Konya','Adana','Kars','Sivas'].includes(name);
+      const marker = L.marker(coords, { icon: makeStationIcon(isHub), zIndexOffset: 100 }).addTo(map);
+      const label = L.tooltip({
+        permanent: true,
+        direction: 'right',
+        className: 'station-label',
+        offset: [isHub ? 9 : 7, 0],
+      }).setContent(`<span style="font-size:${isHub?12:10}px;font-weight:${isHub?600:400};color:${isHub?'#1a1a1a':'#555'};font-family:-apple-system,sans-serif">${name}</span>`);
+      marker.bindTooltip(label).openTooltip();
+    });
+
+    // Tren markerlarını oluştur
+    TRAINS_DATA.forEach(train => {
+      const line = LINES.find(l => l.id === train.line);
+      if (!line) return;
+      const pos = interpolateOnLine(line.coords, train.progress);
+      const marker = L.marker(pos, { icon: makeTrainIcon(train), zIndexOffset: 500 })
+        .addTo(map)
+        .on('click', () => {
+          selectTrainOnMap(train);
+        });
+      trainMarkers[train.id] = marker;
+      trainProgressMap[train.id] = train.progress;
+    });
+
+    // Hareketli tren animasyonu
+    animateTrains();
+  }
+
+  function animateTrains() {
+    TRAINS_DATA.forEach(train => {
+      if (train.status === 'stop') return;
+      const line = LINES.find(l => l.id === train.line);
+      if (!line || !trainMarkers[train.id]) return;
+
+      // İlerlemeyi artır (hıza göre)
+      const speedFactor = (train.speed / 300) * 0.00005;
+      trainProgressMap[train.id] = (trainProgressMap[train.id] + speedFactor) % 1;
+
+      const pos = interpolateOnLine(line.coords, trainProgressMap[train.id]);
+      trainMarkers[train.id].setLatLng(pos);
+    });
+    animFrame = setTimeout(animateTrains, 1000);
+  }
+
+  function selectTrainOnMap(train) {
+    // Sidebar seçimini güncelle
+    const item = [...document.querySelectorAll('.train-item')].find(el => el.textContent.includes(train.id));
+    if (item) {
+      document.querySelectorAll('.train-item').forEach(i => i.classList.remove('sel'));
+      item.classList.add('sel');
+    }
+    // Info card güncelle
+    document.getElementById('ic-title').textContent = train.id + ' — Seçili';
+    document.getElementById('ic-route').textContent = train.route;
+    document.getElementById('ic-speed').textContent = train.speed + ' km/s';
+    document.getElementById('ic-next').textContent = train.next;
+    document.getElementById('ic-arr').textContent = train.arr;
+    const stat = document.getElementById('ic-stat');
+    stat.textContent = train.label;
+    stat.style.color = train.status === 'ok' ? 'var(--green)' : train.status === 'late' ? 'var(--amber)' : 'var(--red)';
+    // Haritayı trenin üzerine odakla
+    if (trainMarkers[train.id]) {
+      map.panTo(trainMarkers[train.id].getLatLng(), { animate: true });
+    }
+  }
+
+  function togFilter(el, type) {
+    document.querySelectorAll('.fchip').forEach(c => c.classList.remove('on'));
+    el.classList.add('on');
+    TRAINS_DATA.forEach(train => {
+      const marker = trainMarkers[train.id];
+      if (!marker) return;
+      if (type === 'all' || train.type === type) {
+        marker.addTo(map);
+      } else {
+        marker.remove();
+      }
+    });
+    // Hatları da filtrele
+    // (basit implementasyon - tüm hatlar her zaman görünür)
+  }
+
+  // Sayfa haritaya geçince init et
+  const _origGoPageMap = goPage;
+  // goPage zaten düzeltildi, sadece map init ekle
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(initMap, 300);
+  });
+  // Eğer sayfa zaten yüklendiyse
+  if (document.readyState !== 'loading') setTimeout(initMap, 300);
+
 
 
   // ════════════════════════════════════════════
@@ -2007,7 +2305,8 @@ asyncio.run(send_telemetry())</textarea>
   }
 
   // ─── Sayfa geçişinde settings init ───
-// settings init handled in main goPage
+  // (goPage override kaldırıldı - sonsuz döngü önlendi)
+
   // İlk yükleme
   setTimeout(initSettings, 100);
 
