@@ -305,6 +305,112 @@ tr:hover td { background: var(--bg2); cursor:pointer; }
 .hm-cell:hover { opacity:.8; }
 .hm-col-lbl { font-size:10px; color:var(--ts); text-align:center; }
 
+
+/* ══════════════════════════════════════════
+   PAGE 5 — AYARLAR & TREN YÖNETİMİ
+══════════════════════════════════════════ */
+.set-body { flex:1; display:grid; grid-template-columns:220px 1fr; overflow:hidden; background:var(--bg); }
+.set-menu { border-right:0.5px solid var(--br); overflow-y:auto; padding:12px 0; }
+.set-menu-item { padding:8px 16px; font-size:13px; color:var(--ts); cursor:pointer; border-radius:6px; margin:0 8px 2px; display:flex; align-items:center; gap:8px; transition:background .12s; }
+.set-menu-item:hover { background:var(--bg2); color:var(--tp); }
+.set-menu-item.active { background:var(--bg2); color:var(--tp); font-weight:500; }
+.set-menu-item .mi-icon { font-size:15px; width:20px; text-align:center; }
+.set-menu-sep { margin:8px 16px; border:none; border-top:0.5px solid var(--br); }
+
+.set-content { overflow-y:auto; padding:24px; }
+.set-section { display:none; }
+.set-section.active { display:block; }
+.set-hdr { font-size:16px; font-weight:500; margin-bottom:4px; }
+.set-sub { font-size:12px; color:var(--ts); margin-bottom:24px; }
+
+/* Train list */
+.train-mgr { display:flex; flex-direction:column; gap:12px; }
+.train-card { background:var(--bg2); border:0.5px solid var(--br); border-radius:var(--rlg); padding:16px 18px; display:flex; align-items:center; gap:14px; }
+.train-card.connected { border-left:3px solid var(--green); }
+.train-card.disconnected { border-left:3px solid var(--ts); }
+.train-card.error { border-left:3px solid var(--red); }
+.tc-icon { font-size:22px; }
+.tc-info { flex:1; }
+.tc-name { font-size:14px; font-weight:500; margin-bottom:2px; }
+.tc-meta { font-size:11px; color:var(--ts); }
+.tc-status { display:flex; align-items:center; gap:5px; font-size:11px; font-weight:500; }
+.tc-actions { display:flex; gap:6px; }
+.tc-btn { padding:5px 11px; font-size:12px; border-radius:6px; border:0.5px solid var(--brm); background:var(--bg); color:var(--tp); cursor:pointer; font-family:var(--font); transition:background .12s; }
+.tc-btn:hover { background:var(--bg3); }
+.tc-btn.danger { color:var(--red); border-color:var(--red); }
+.tc-btn.primary { background:var(--blue); color:#fff; border-color:var(--blue); }
+.tc-btn.primary:hover { opacity:.9; }
+
+/* Add train form */
+.add-train-card { background:var(--bg2); border:0.5px dashed var(--brm); border-radius:var(--rlg); padding:20px; }
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+.form-group { display:flex; flex-direction:column; gap:5px; }
+.form-group.full { grid-column:1/-1; }
+.form-label { font-size:11px; font-weight:600; color:var(--ts); text-transform:uppercase; letter-spacing:.04em; }
+.form-input { height:34px; border:0.5px solid var(--brm); border-radius:6px; padding:0 10px; font-size:13px; background:var(--bg); color:var(--tp); font-family:var(--font); outline:none; transition:border-color .15s; }
+.form-input:focus { border-color:var(--blue); }
+.form-select { height:34px; border:0.5px solid var(--brm); border-radius:6px; padding:0 8px; font-size:13px; background:var(--bg); color:var(--tp); font-family:var(--font); outline:none; cursor:pointer; }
+.form-textarea { border:0.5px solid var(--brm); border-radius:6px; padding:8px 10px; font-size:13px; background:var(--bg); color:var(--tp); font-family:var(--font); outline:none; resize:vertical; min-height:70px; }
+.form-textarea:focus { border-color:var(--blue); }
+
+/* Connection test panel */
+.conn-test { background:var(--bg3); border-radius:var(--rmd); padding:12px 14px; margin-top:12px; font-size:12px; font-family:monospace; color:var(--ts); min-height:60px; max-height:120px; overflow-y:auto; }
+.conn-log-line { margin-bottom:3px; }
+.conn-log-line.ok { color:var(--green); }
+.conn-log-line.err { color:var(--red); }
+.conn-log-line.info { color:var(--blue); }
+.conn-log-line.warn { color:var(--amber); }
+
+/* Live data panel */
+.live-data-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:16px; }
+.ld-card { background:var(--bg2); border:0.5px solid var(--br); border-radius:var(--rmd); padding:12px 14px; }
+.ld-label { font-size:10px; font-weight:600; color:var(--ts); text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px; }
+.ld-value { font-size:20px; font-weight:500; font-variant-numeric:tabular-nums; }
+.ld-unit { font-size:11px; color:var(--ts); margin-left:3px; }
+.ld-time { font-size:10px; color:var(--tt); margin-top:3px; }
+
+/* Protocol settings */
+.proto-tabs { display:flex; gap:0; border:0.5px solid var(--brm); border-radius:6px; overflow:hidden; margin-bottom:20px; width:fit-content; }
+.proto-tab { padding:7px 18px; font-size:12px; background:var(--bg); border:none; cursor:pointer; color:var(--ts); font-family:var(--font); transition:.12s; }
+.proto-tab.active { background:var(--blue); color:#fff; }
+
+/* API key display */
+.api-key-box { display:flex; align-items:center; gap:8px; background:var(--bg3); border-radius:6px; padding:8px 12px; font-family:monospace; font-size:12px; color:var(--ts); }
+.api-key-val { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.copy-btn { padding:4px 10px; font-size:11px; border-radius:4px; border:0.5px solid var(--brm); background:var(--bg); color:var(--ts); cursor:pointer; flex-shrink:0; font-family:var(--font); }
+.copy-btn:hover { background:var(--bg2); }
+
+/* Status badge */
+.status-pill { display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:20px; font-size:11px; font-weight:500; }
+.sp-green { background:#d1fae5; color:#065f46; }
+.sp-red { background:#fee2e2; color:#991b1b; }
+.sp-gray { background:var(--bg3); color:var(--ts); }
+.sp-amber { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme:dark) {
+  .sp-green { background:#064e3b; color:#6ee7b7; }
+  .sp-red { background:#450a0a; color:#fca5a5; }
+  .sp-amber { background:#451a03; color:#fcd34d; }
+}
+
+/* Section divider */
+.set-divider { border:none; border-top:0.5px solid var(--br); margin:20px 0; }
+.set-row { display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:0.5px solid var(--br); }
+.set-row:last-child { border-bottom:none; }
+.set-row-info { font-size:13px; }
+.set-row-desc { font-size:11px; color:var(--ts); margin-top:2px; }
+
+/* Toggle switch */
+.toggle { position:relative; width:36px; height:20px; flex-shrink:0; }
+.toggle input { opacity:0; width:0; height:0; }
+.toggle-slider { position:absolute; inset:0; background:var(--br); border-radius:20px; cursor:pointer; transition:.2s; }
+.toggle-slider::before { content:''; position:absolute; width:14px; height:14px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.2s; }
+.toggle input:checked + .toggle-slider { background:var(--blue); }
+.toggle input:checked + .toggle-slider::before { transform:translateX(16px); }
+
+/* Save button */
+.save-btn { padding:8px 20px; background:var(--blue); color:#fff; border:none; border-radius:6px; font-size:13px; font-family:var(--font); cursor:pointer; font-weight:500; transition:opacity .15s; }
+.save-btn:hover { opacity:.88; }
+
 /* ─── ANIMATIONS ─── */
 @keyframes moveTrain1 { 0%{offset-distance:0%} 100%{offset-distance:100%} }
 @keyframes moveTrain2 { 0%{offset-distance:20%} 100%{offset-distance:100%} }
@@ -350,8 +456,8 @@ tr:hover td { background: var(--bg2); cursor:pointer; }
     <div class="nav-tab" data-page="report" onclick="goPage('report',this)">
       <span class="tab-icon">📊</span> Raporlama
     </div>
-     <div class="nav-tab" data-page="report" onclick="goPage('report',this)">
-      <span class="tab-icon">📊</span> Raporlama
+    <div class="nav-tab" data-page="settings" onclick="goPage('settings',this)">
+      <span class="tab-icon">⚙️</span> Ayarlar
     </div>
   </nav>
 
@@ -943,6 +1049,375 @@ tr:hover td { background: var(--bg2); cursor:pointer; }
       </div>
     </div><!-- /page-report -->
 
+
+    <!-- ──────────────────────────────────────
+         PAGE 5: AYARLAR & TREN YÖNETİMİ
+    ────────────────────────────────────── -->
+    <div class="page" id="page-settings">
+      <div class="set-body">
+
+        <!-- Left menu -->
+        <div class="set-menu">
+          <div class="set-menu-item active" onclick="setSection('trains',this)"><span class="mi-icon">🚆</span> Tren Yönetimi</div>
+          <div class="set-menu-item" onclick="setSection('connection',this)"><span class="mi-icon">🔌</span> Bağlantı</div>
+          <div class="set-menu-item" onclick="setSection('livedata',this)"><span class="mi-icon">📡</span> Canlı Veri</div>
+          <div class="set-menu-item" onclick="setSection('protocol',this)"><span class="mi-icon">⚙️</span> Protokol</div>
+          <hr class="set-menu-sep">
+          <div class="set-menu-item" onclick="setSection('security',this)"><span class="mi-icon">🔐</span> Güvenlik & API</div>
+          <div class="set-menu-item" onclick="setSection('system',this)"><span class="mi-icon">🖥</span> Sistem</div>
+        </div>
+
+        <!-- Right content -->
+        <div class="set-content">
+
+          <!-- ── Tren Yönetimi ── -->
+          <div class="set-section active" id="sec-trains">
+            <div class="set-hdr">Tren Yönetimi</div>
+            <div class="set-sub">Sisteme kayıtlı trenleri ve endüstriyel PC bağlantılarını yönetin.</div>
+
+            <div class="train-mgr" id="trainList">
+              <!-- Populated by JS -->
+            </div>
+
+            <div style="margin-top:20px;margin-bottom:10px;font-size:13px;font-weight:500;">Yeni Tren Ekle</div>
+            <div class="add-train-card">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">Tren ID</label>
+                  <input class="form-input" id="f-trainId" placeholder="YHT-10501" type="text">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Tren Adı</label>
+                  <input class="form-input" id="f-trainName" placeholder="YHT 10501 Ankara–İstanbul" type="text">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Tren Tipi</label>
+                  <select class="form-select" id="f-trainType">
+                    <option value="YHT">YHT (Yüksek Hızlı Tren)</option>
+                    <option value="IC">IC (İnter City)</option>
+                    <option value="REG">Bölgesel</option>
+                    <option value="METRO">Metro / Kent İçi</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Endüstriyel PC IP / Host</label>
+                  <input class="form-input" id="f-host" placeholder="192.168.1.100 veya tren-01.domain.com" type="text">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Port</label>
+                  <input class="form-input" id="f-port" placeholder="8765" type="number" value="8765">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Protokol</label>
+                  <select class="form-select" id="f-proto">
+                    <option value="ws">WebSocket (ws://)</option>
+                    <option value="wss">WebSocket TLS (wss://)</option>
+                    <option value="http">REST API (HTTP)</option>
+                    <option value="https">REST API (HTTPS)</option>
+                    <option value="mqtt">MQTT</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Hat / Güzergah</label>
+                  <input class="form-input" id="f-route" placeholder="Ankara – İstanbul" type="text">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Veri Güncelleme Aralığı (sn)</label>
+                  <input class="form-input" id="f-interval" placeholder="1" type="number" value="1" min="1" max="60">
+                </div>
+                <div class="form-group full">
+                  <label class="form-label">API Anahtarı <span style="color:var(--green);font-weight:400">(Test modunda opsiyonel)</span></label>
+                  <div style="display:flex;gap:8px">
+                    <input class="form-input" id="f-apikey" placeholder="Test modu: boş bırakabilirsiniz" type="text" style="flex:1">
+                    <button class="tc-btn" onclick="generateApiKey()">🔑 Oluştur</button>
+                  </div>
+                </div>
+                <div class="form-group full">
+                  <label class="form-label">Notlar</label>
+                  <textarea class="form-textarea" id="f-notes" placeholder="Tren hakkında ek bilgiler..."></textarea>
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <button class="save-btn" onclick="addTrain()">+ Tren Ekle</button>
+                <button class="tc-btn" onclick="testConnection()">🔗 Bağlantıyı Test Et</button>
+                <span id="addTrainMsg" style="font-size:12px;color:var(--green)"></span>
+              </div>
+              <div class="conn-test" id="connTestLog" style="display:none"></div>
+            </div>
+          </div>
+
+          <!-- ── Bağlantı ── -->
+          <div class="set-section" id="sec-connection">
+            <div class="set-hdr">Bağlantı Durumu</div>
+            <div class="set-sub">Endüstriyel PC'lerle aktif WebSocket/REST bağlantılarını izleyin.</div>
+
+            <div id="connStatusList">
+              <!-- Populated by JS -->
+            </div>
+
+            <hr class="set-divider">
+            <div style="font-size:13px;font-weight:500;margin-bottom:12px">Genel Bağlantı Ayarları</div>
+
+            <div class="set-row">
+              <div>
+                <div class="set-row-info">Otomatik Yeniden Bağlan</div>
+                <div class="set-row-desc">Bağlantı kesilince otomatik yeniden bağlan</div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="tog-reconnect" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="set-row">
+              <div>
+                <div class="set-row-info">Bağlantı Zaman Aşımı</div>
+                <div class="set-row-desc">Yanıt bekleme süresi (saniye)</div>
+              </div>
+              <input class="form-input" style="width:70px;text-align:center" type="number" value="10" min="1" max="60">
+            </div>
+            <div class="set-row">
+              <div>
+                <div class="set-row-info">Heartbeat Aralığı</div>
+                <div class="set-row-desc">Bağlantı canlılık kontrolü (saniye)</div>
+              </div>
+              <input class="form-input" style="width:70px;text-align:center" type="number" value="30" min="5" max="300">
+            </div>
+            <div class="set-row">
+              <div>
+                <div class="set-row-info">Bağlantı Logu</div>
+                <div class="set-row-desc">Tüm bağlantı olaylarını kaydet</div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="tog-log" checked><span class="toggle-slider"></span></label>
+            </div>
+
+            <div style="margin-top:16px">
+              <button class="save-btn" onclick="saveConnSettings()">Kaydet</button>
+            </div>
+          </div>
+
+          <!-- ── Canlı Veri ── -->
+          <div class="set-section" id="sec-livedata">
+            <div class="set-hdr">Canlı Veri İzleme</div>
+            <div class="set-sub">Seçili trenden gelen gerçek zamanlı GNSS ve telemetri verilerini izleyin.</div>
+
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+              <select class="form-select" id="liveTrainSelect" onchange="selectLiveTrain(this.value)" style="width:220px">
+                <option value="">Tren seçin...</option>
+              </select>
+              <span id="liveConnPill" class="status-pill sp-gray">Bağlı değil</span>
+              <button class="tc-btn primary" onclick="connectLive()" id="liveConnBtn">Bağlan</button>
+              <button class="tc-btn" onclick="disconnectLive()" id="liveDiscBtn" style="display:none">Bağlantıyı Kes</button>
+            </div>
+
+            <div class="live-data-grid" id="liveDataGrid">
+              <div class="ld-card"><div class="ld-label">Enlem</div><div class="ld-value" id="ld-lat">—<span class="ld-unit">°</span></div><div class="ld-time" id="ld-lat-t">—</div></div>
+              <div class="ld-card"><div class="ld-label">Boylam</div><div class="ld-value" id="ld-lon">—<span class="ld-unit">°</span></div><div class="ld-time" id="ld-lon-t">—</div></div>
+              <div class="ld-card"><div class="ld-label">Rakım</div><div class="ld-value" id="ld-alt">—<span class="ld-unit">m</span></div><div class="ld-time" id="ld-alt-t">—</div></div>
+              <div class="ld-card"><div class="ld-label">Hız</div><div class="ld-value" id="ld-spd">—<span class="ld-unit">km/s</span></div><div class="ld-time" id="ld-spd-t">—</div></div>
+              <div class="ld-card"><div class="ld-label">Heading</div><div class="ld-value" id="ld-hdg">—<span class="ld-unit">°</span></div><div class="ld-time" id="ld-hdg-t">—</div></div>
+              <div class="ld-card"><div class="ld-label">GNSS Uydu</div><div class="ld-value" id="ld-sat">—</div><div class="ld-time" id="ld-sat-t">—</div></div>
+              <div class="ld-card"><div class="ld-label">İvme X</div><div class="ld-value" id="ld-ax">—<span class="ld-unit">g</span></div><div class="ld-time" id="ld-ax-t">—</div></div>
+              <div class="ld-card"><div class="ld-label">Kapı Durumu</div><div class="ld-value" id="ld-door" style="font-size:14px">—</div><div class="ld-time" id="ld-door-t">—</div></div>
+              <div class="ld-card"><div class="ld-label">Sistem Alarmı</div><div class="ld-value" id="ld-alarm" style="font-size:14px">—</div><div class="ld-time" id="ld-alarm-t">—</div></div>
+            </div>
+
+            <div style="margin-top:16px;font-size:11px;font-weight:600;color:var(--ts);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Ham Veri Akışı</div>
+            <div class="conn-test" id="rawDataLog" style="display:block;height:150px">Bağlantı bekleniyor...</div>
+          </div>
+
+          <!-- ── Protokol ── -->
+          <div class="set-section" id="sec-protocol">
+            <div class="set-hdr">Protokol Ayarları</div>
+            <div class="set-sub">Endüstriyel PC'den veri almak için kullanılacak protokol ve veri formatını ayarlayın.</div>
+
+            <div class="proto-tabs">
+              <button class="proto-tab active" onclick="setProtoTab('ws',this)">WebSocket</button>
+              <button class="proto-tab" onclick="setProtoTab('rest',this)">REST API</button>
+              <button class="proto-tab" onclick="setProtoTab('mqtt',this)">MQTT</button>
+            </div>
+
+            <div id="proto-ws">
+              <div class="form-grid" style="max-width:600px">
+                <div class="form-group full">
+                  <label class="form-label">Örnek Bağlantı URL'si</label>
+                  <input class="form-input" value="ws://192.168.1.100:8765/gnss" readonly style="font-family:monospace;font-size:12px;color:var(--ts)">
+                </div>
+                <div class="form-group full">
+                  <label class="form-label">Beklenen JSON Formatı (Endüstriyel PC → Merkez)</label>
+                  <textarea class="form-textarea" readonly style="font-family:monospace;font-size:11px;height:160px">{
+  "train_id": "YHT-10501",
+  "timestamp": 1711234567890,
+  "gnss": {
+    "lat": 39.9208,
+    "lon": 32.8541,
+    "alt": 890.5,
+    "speed_kmh": 287.3,
+    "heading": 312.4,
+    "satellites": 12,
+    "hdop": 0.8,
+    "fix": "3D"
+  },
+  "telemetry": {
+    "speed_kmh": 287.3,
+    "accel_x": 0.023,
+    "accel_y": -0.015,
+    "accel_z": 0.981,
+    "brake_pressure_bar": 4.2,
+    "brake_active": false,
+    "emergency_brake": false
+  }
+}</textarea>
+                </div>
+              </div>
+              <div style="background:var(--bg2);border-radius:var(--rmd);padding:12px 14px;font-size:12px;color:var(--ts);max-width:600px;margin-top:4px">
+                💡 <strong>Test Modu:</strong> Kimlik doğrulama yok. Endüstriyel PC'den WebSocket bağlantısı açıp bu JSON formatını gönderin.
+              <div style="margin-top:10px;font-size:11px;font-weight:600;color:var(--ts);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Endüstriyel PC — Python Örnek Kodu</div>
+              <textarea class="form-textarea" readonly style="font-family:monospace;font-size:11px;height:200px;max-width:600px">import asyncio, websockets, json, time
+import serial  # GPS/GNSS seri port için
+
+# GPS modülü seri bağlantısı (opsiyonel)
+# gps = serial.Serial('/dev/ttyUSB0', 9600)
+
+TRAIN_ID = "YHT-10501"
+SERVER_URL = "ws://merkez-sunucu:8765"  # TCDD Merkez IP
+
+async def send_telemetry():
+    async with websockets.connect(SERVER_URL) as ws:
+        print(f"Bağlandı: {SERVER_URL}")
+        while True:
+            # GNSS verisini oku (gerçekte GPS modülünden)
+            payload = {
+                "train_id": TRAIN_ID,
+                "timestamp": int(time.time() * 1000),
+                "gnss": {
+                    "lat": 39.9208,   # GPS'ten oku
+                    "lon": 32.8541,   # GPS'ten oku
+                    "alt": 890.5,
+                    "speed_kmh": 287.3,
+                    "heading": 312.4,
+                    "satellites": 12,
+                    "hdop": 0.8,
+                    "fix": "3D"
+                },
+                "telemetry": {
+                    "speed_kmh": 287.3,
+                    "accel_x": 0.023,   # İvme sensöründen
+                    "accel_y": -0.015,
+                    "accel_z": 0.981,
+                    "brake_pressure_bar": 4.2,
+                    "brake_active": False,
+                    "emergency_brake": False
+                }
+            }
+            await ws.send(json.dumps(payload))
+            await asyncio.sleep(1)  # 1 saniyede bir gönder
+
+asyncio.run(send_telemetry())</textarea>
+              </div>
+            </div>
+
+            <div id="proto-rest" style="display:none">
+              <div class="form-grid" style="max-width:600px">
+                <div class="form-group full">
+                  <label class="form-label">Endpoint</label>
+                  <input class="form-input" value="POST /api/v1/telemetry" readonly style="font-family:monospace;font-size:12px;color:var(--ts)">
+                </div>
+                <div class="form-group full">
+                  <label class="form-label">Header</label>
+                  <input class="form-input" value="Authorization: Bearer {api_key}" readonly style="font-family:monospace;font-size:12px;color:var(--ts)">
+                </div>
+                <div class="form-group full">
+                  <label class="form-label">Polling Aralığı (sn)</label>
+                  <input class="form-input" type="number" value="1" min="1" max="60" style="width:100px">
+                </div>
+              </div>
+            </div>
+
+            <div id="proto-mqtt" style="display:none">
+              <div class="form-grid" style="max-width:600px">
+                <div class="form-group">
+                  <label class="form-label">Broker Host</label>
+                  <input class="form-input" placeholder="mqtt.example.com" type="text">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Broker Port</label>
+                  <input class="form-input" placeholder="1883" type="number">
+                </div>
+                <div class="form-group full">
+                  <label class="form-label">Topic Pattern</label>
+                  <input class="form-input" value="tcdd/trains/{train_id}/gnss" type="text" style="font-family:monospace;font-size:12px">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Güvenlik & API ── -->
+          <div class="set-section" id="sec-security">
+            <div class="set-hdr">Güvenlik & API Anahtarları</div>
+            <div class="set-sub">Tren başına API anahtarlarını yönetin. Her endüstriyel PC kendi anahtarını kullanır.</div>
+            <div style="background:#fef3c7;border:1px solid #d97706;border-radius:8px;padding:10px 14px;font-size:12px;color:#92400e;margin-bottom:16px">⚠️ <strong>Test Modu Aktif:</strong> Şu an kimlik doğrulama kapalı. Üretim ortamına geçmeden önce aşağıdan "API Key Zorlaması"nı aktif edin.</div>
+
+            <div id="apiKeyList"><!-- Populated by JS --></div>
+
+            <hr class="set-divider">
+            <div class="set-row">
+              <div>
+                <div class="set-row-info">API Key Zorlaması</div>
+                <div class="set-row-desc">Geçersiz API anahtarlarından gelen bağlantıları reddet</div>
+              </div>
+              <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+            </div>
+            <div class="set-row">
+              <div>
+                <div class="set-row-info">TLS / SSL Şifreleme</div>
+                <div class="set-row-desc">wss:// ve https:// protokolleri kullan</div>
+              </div>
+              <label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label>
+            </div>
+            <div class="set-row">
+              <div>
+                <div class="set-row-info">IP Kısıtlaması</div>
+                <div class="set-row-desc">Sadece belirli IP aralıklarından bağlantıya izin ver</div>
+              </div>
+              <label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label>
+            </div>
+          </div>
+
+          <!-- ── Sistem ── -->
+          <div class="set-section" id="sec-system">
+            <div class="set-hdr">Sistem Bilgileri</div>
+            <div class="set-sub">TCDD Tren Takip Sistemi genel durum ve versiyon bilgileri.</div>
+
+            <div class="set-row">
+              <div class="set-row-info">Versiyon</div>
+              <div style="font-size:12px;color:var(--ts)">v2.0.0 — Raporlama & Tren Yönetimi</div>
+            </div>
+            <div class="set-row">
+              <div class="set-row-info">Aktif Tren Sayısı</div>
+              <div style="font-size:12px;font-weight:500" id="sys-trainCount">0</div>
+            </div>
+            <div class="set-row">
+              <div class="set-row-info">Bağlı Endüstriyel PC</div>
+              <div style="font-size:12px;font-weight:500;color:var(--green)" id="sys-connCount">0</div>
+            </div>
+            <div class="set-row">
+              <div class="set-row-info">Toplam Veri Paketi (Bu Oturum)</div>
+              <div style="font-size:12px;font-weight:500" id="sys-pkgCount">0</div>
+            </div>
+            <div class="set-row">
+              <div class="set-row-info">Son Güncelleme</div>
+              <div style="font-size:12px;color:var(--ts)" id="sys-lastUpdate">—</div>
+            </div>
+
+            <hr class="set-divider">
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="tc-btn danger" onclick="if(confirm('Tüm tren verileri silinecek. Emin misiniz?')) clearAllTrains()">🗑 Tüm Trenleri Sil</button>
+              <button class="tc-btn" onclick="exportConfig()">📤 Yapılandırmayı Dışa Aktar</button>
+              <button class="tc-btn" onclick="importConfig()">📥 Yapılandırmayı İçe Aktar</button>
+            </div>
+          </div>
+
+        </div><!-- /set-content -->
+      </div>
+    </div><!-- /page-settings -->
+
   </main>
 </div>
 
@@ -1065,6 +1540,481 @@ tr:hover td { background: var(--bg2); cursor:pointer; }
   function exportPDF() {
     window.print();
   }
+
+
+  // ════════════════════════════════════════════
+  //   AYARLAR & TREN YÖNETİM SİSTEMİ
+  // ════════════════════════════════════════════
+
+  // ─── Veri deposu (localStorage'a da kaydedilir) ───
+  let trains = JSON.parse(localStorage.getItem('tcdd_trains') || '[]');
+  let activeWS = {}; // train_id → WebSocket
+  let activeIntervals = {}; // train_id → interval
+  let totalPackets = 0;
+  let selectedLiveTrain = null;
+
+  function saveTrains() {
+    localStorage.setItem('tcdd_trains', JSON.stringify(trains));
+  }
+
+  // ─── API Key üreteci ───
+  function generateApiKey() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let key = 'tcdd_';
+    for (let i = 0; i < 32; i++) key += chars[Math.floor(Math.random() * chars.length)];
+    document.getElementById('f-apikey').value = key;
+  }
+
+  // ─── Tren listesini render et ───
+  function renderTrainList() {
+    const container = document.getElementById('trainList');
+    if (!container) return;
+
+    if (trains.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:30px;color:var(--ts);font-size:13px">Henüz tren eklenmedi.<br>Aşağıdaki formu kullanarak tren ekleyin.</div>';
+    } else {
+      container.innerHTML = trains.map((t, i) => {
+        const ws = activeWS[t.id];
+        const connected = ws && ws.readyState === 1;
+        const statusClass = connected ? 'connected' : 'disconnected';
+        const statusPill = connected
+          ? '<span class="status-pill sp-green">● Bağlı</span>'
+          : '<span class="status-pill sp-gray">○ Bağlı Değil</span>';
+        return `
+        <div class="train-card ${statusClass}" id="tc-${t.id}">
+          <div class="tc-icon">${t.type === 'YHT' ? '🚄' : t.type === 'IC' ? '🚂' : '🚆'}</div>
+          <div class="tc-info">
+            <div class="tc-name">${t.name} <span style="font-size:11px;font-family:monospace;background:var(--bg3);padding:1px 6px;border-radius:3px;color:var(--ts)">${t.id}</span></div>
+            <div class="tc-meta">${t.proto}://${t.host}:${t.port} · ${t.route || 'Hat belirtilmedi'} · ${t.interval}sn aralık</div>
+          </div>
+          ${statusPill}
+          <div class="tc-actions">
+            ${connected
+              ? `<button class="tc-btn danger" onclick="disconnectTrain('${t.id}')">⏹ Kes</button>`
+              : `<button class="tc-btn primary" onclick="connectTrain('${t.id}')">▶ Bağlan</button>`
+            }
+            <button class="tc-btn" onclick="viewTrainDetail('${t.id}')">📡 Veri</button>
+            <button class="tc-btn danger" onclick="removeTrain(${i})">🗑</button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    // Update system stats
+    const el = document.getElementById('sys-trainCount');
+    if (el) el.textContent = trains.length;
+    const el2 = document.getElementById('sys-connCount');
+    if (el2) el2.textContent = Object.values(activeWS).filter(ws => ws && ws.readyState === 1).length;
+
+    // Populate live train select
+    const sel = document.getElementById('liveTrainSelect');
+    if (sel) {
+      const cur = sel.value;
+      sel.innerHTML = '<option value="">Tren seçin...</option>' +
+        trains.map(t => `<option value="${t.id}" ${t.id===cur?'selected':''}>${t.name} (${t.id})</option>`).join('');
+    }
+
+    // API key list
+    renderApiKeys();
+    renderConnStatus();
+  }
+
+  // ─── API Key listesi ───
+  function renderApiKeys() {
+    const container = document.getElementById('apiKeyList');
+    if (!container) return;
+    if (trains.length === 0) {
+      container.innerHTML = '<div style="color:var(--ts);font-size:13px;padding:10px 0">Henüz tren eklenmedi.</div>';
+      return;
+    }
+    container.innerHTML = trains.map(t => `
+      <div class="set-row">
+        <div>
+          <div class="set-row-info">${t.name}</div>
+          <div class="set-row-desc">${t.id}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="api-key-box" style="width:300px">
+            <span class="api-key-val" id="ak-${t.id}">${t.apikey ? '•'.repeat(20) : 'API Key yok'}</span>
+            <button class="copy-btn" onclick="toggleKey('${t.id}','${t.apikey||''}')">Göster</button>
+            <button class="copy-btn" onclick="copyKey('${t.apikey||''}')">Kopyala</button>
+          </div>
+          <button class="tc-btn" onclick="regenKey(${trains.indexOf(t)})">🔑 Yenile</button>
+        </div>
+      </div>`).join('');
+  }
+
+  // ─── Bağlantı durumu ───
+  function renderConnStatus() {
+    const container = document.getElementById('connStatusList');
+    if (!container) return;
+    if (trains.length === 0) {
+      container.innerHTML = '<div style="color:var(--ts);font-size:13px;padding:10px 0">Kayıtlı tren yok.</div>';
+      return;
+    }
+    container.innerHTML = trains.map(t => {
+      const ws = activeWS[t.id];
+      const s = ws ? ws.readyState : -1;
+      const [pill, txt] = s === 1 ? ['sp-green','Bağlı'] : s === 0 ? ['sp-amber','Bağlanıyor...'] : ['sp-gray','Bağlı Değil'];
+      return `
+      <div class="set-row">
+        <div>
+          <div class="set-row-info">${t.name}</div>
+          <div class="set-row-desc">${t.proto}://${t.host}:${t.port}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="status-pill ${pill}">${txt}</span>
+          ${s === 1
+            ? `<button class="tc-btn danger" onclick="disconnectTrain('${t.id}')">Kes</button>`
+            : `<button class="tc-btn primary" onclick="connectTrain('${t.id}')">Bağlan</button>`}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ─── Tren Ekle ───
+  function addTrain() {
+    const id = document.getElementById('f-trainId').value.trim();
+    const name = document.getElementById('f-trainName').value.trim();
+    if (!id || !name) { alert('Tren ID ve Tren Adı zorunludur.'); return; }
+    if (trains.find(t => t.id === id)) { alert('Bu Tren ID zaten kullanılıyor.'); return; }
+
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let autoKey = 'tcdd_';
+    for (let i = 0; i < 32; i++) autoKey += chars[Math.floor(Math.random() * chars.length)];
+
+    trains.push({
+      id,
+      name,
+      type: document.getElementById('f-trainType').value,
+      host: document.getElementById('f-host').value.trim() || 'localhost',
+      port: document.getElementById('f-port').value || '8765',
+      proto: document.getElementById('f-proto').value,
+      route: document.getElementById('f-route').value.trim(),
+      interval: document.getElementById('f-interval').value || '1',
+      apikey: document.getElementById('f-apikey').value.trim() || autoKey,
+      notes: document.getElementById('f-notes').value.trim(),
+      addedAt: Date.now()
+    });
+    saveTrains();
+    renderTrainList();
+
+    // Clear form
+    ['f-trainId','f-trainName','f-host','f-route','f-apikey','f-notes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('f-port').value = '8765';
+    document.getElementById('f-interval').value = '1';
+
+    const msg = document.getElementById('addTrainMsg');
+    msg.textContent = `✅ ${name} eklendi!`;
+    setTimeout(() => msg.textContent = '', 3000);
+  }
+
+  // ─── Tren Sil ───
+  function removeTrain(idx) {
+    const t = trains[idx];
+    if (!confirm(`"${t.name}" silinecek. Emin misiniz?`)) return;
+    disconnectTrain(t.id);
+    trains.splice(idx, 1);
+    saveTrains();
+    renderTrainList();
+  }
+
+  // ─── Tüm trenleri sil ───
+  function clearAllTrains() {
+    trains.forEach(t => disconnectTrain(t.id));
+    trains = [];
+    saveTrains();
+    renderTrainList();
+  }
+
+  // ─── WebSocket Bağlan ───
+  function connectTrain(trainId) {
+    const t = trains.find(t => t.id === trainId);
+    if (!t) return;
+    if (activeWS[trainId]) disconnectTrain(trainId);
+
+    const proto = t.proto === 'ws' || t.proto === 'wss' ? t.proto : 'ws';
+    const url = `${proto}://${t.host}:${t.port}`;
+
+    logRaw(`[${trainId}] Bağlanıyor: ${url}`, 'info');
+
+    try {
+      const ws = new WebSocket(url);
+      activeWS[trainId] = ws;
+
+      ws.onopen = () => {
+        logRaw(`[${trainId}] ✅ Bağlantı kuruldu`, 'ok');
+        // Kimlik doğrulama paketi gönder
+        // Test modu: kimlik doğrulama yok
+        ws.send(JSON.stringify({ type: 'hello', train_id: trainId, mode: 'test' }));
+        renderTrainList();
+        updateLiveConnPill(trainId);
+      };
+
+      ws.onmessage = (e) => {
+        totalPackets++;
+        const el = document.getElementById('sys-pkgCount');
+        if (el) el.textContent = totalPackets;
+        const el2 = document.getElementById('sys-lastUpdate');
+        if (el2) el2.textContent = new Date().toLocaleTimeString('tr-TR');
+
+        try {
+          const data = JSON.parse(e.data);
+          logRaw(`[${trainId}] ← ${e.data.substring(0,120)}${e.data.length>120?'...':''}`, 'ok');
+          if (selectedLiveTrain === trainId) updateLiveData(data);
+          // Update map marker position
+          if (data.gnss) updateMapMarker(trainId, data.gnss);
+        } catch {
+          logRaw(`[${trainId}] ← ${e.data.substring(0,80)}`, 'info');
+        }
+      };
+
+      ws.onerror = () => {
+        logRaw(`[${trainId}] ❌ Bağlantı hatası`, 'err');
+        renderTrainList();
+        updateLiveConnPill(trainId);
+      };
+
+      ws.onclose = () => {
+        logRaw(`[${trainId}] Bağlantı kapandı`, 'warn');
+        delete activeWS[trainId];
+        renderTrainList();
+        updateLiveConnPill(trainId);
+        // Auto reconnect
+        const tog = document.getElementById('tog-reconnect');
+        if (tog && tog.checked && trains.find(t=>t.id===trainId)) {
+          logRaw(`[${trainId}] 5sn sonra yeniden bağlanılacak...`, 'info');
+          setTimeout(() => connectTrain(trainId), 5000);
+        }
+      };
+    } catch(err) {
+      logRaw(`[${trainId}] ❌ WebSocket oluşturulamadı: ${err.message}`, 'err');
+    }
+  }
+
+  // ─── WebSocket Kes ───
+  function disconnectTrain(trainId) {
+    const ws = activeWS[trainId];
+    if (ws) { ws.onclose = null; ws.close(); delete activeWS[trainId]; }
+    renderTrainList();
+    updateLiveConnPill(trainId);
+  }
+
+  // ─── Canlı Veri Güncelle ───
+  function updateLiveData(data) {
+    const now = new Date().toLocaleTimeString('tr-TR');
+    if (data.gnss) {
+      const g = data.gnss;
+      setLive('lat', g.lat?.toFixed(6), now);
+      setLive('lon', g.lon?.toFixed(6), now);
+      setLive('alt', g.alt?.toFixed(1), now);
+      setLive('spd', g.speed_kmh?.toFixed(1), now);
+      setLive('hdg', g.heading?.toFixed(1), now);
+      setLive('sat', g.satellites, now);
+      setLive('hdop', g.hdop?.toFixed(2), now);
+      setLive('fix', g.fix || '—', now);
+    }
+    if (data.telemetry) {
+      const tel = data.telemetry;
+      // Hız (gnss'den öncelikli, telemetri de olabilir)
+      if (tel.speed_kmh !== undefined) setLive('spd', tel.speed_kmh?.toFixed(1), now);
+      // İvme
+      setLive('ax', tel.accel_x !== undefined ? tel.accel_x.toFixed(3) : '—', now);
+      setLive('ay', tel.accel_y !== undefined ? tel.accel_y.toFixed(3) : '—', now);
+      // Fren
+      setLive('brake', tel.brake_pressure_bar !== undefined ? tel.brake_pressure_bar.toFixed(1) : '—', now);
+      const ebr = tel.emergency_brake;
+      setLive('ebr',
+        ebr === true  ? '🔴 AKTİF' :
+        ebr === false ? '🟢 Pasif' : '—', now);
+      // Fren aktifse hız rengini değiştir
+      const spdEl = document.getElementById('ld-spd');
+      if (spdEl) spdEl.style.color = tel.brake_active ? 'var(--red)' : 'var(--green)';
+    }
+  }
+
+  function setLive(key, val, time) {
+    const el = document.getElementById('ld-' + key);
+    const te = document.getElementById('ld-' + key + '-t');
+    if (el && val !== undefined && val !== null) {
+      // Keep unit span
+      const unit = el.querySelector('.ld-unit');
+      el.childNodes[0].textContent = val;
+      if (unit) el.appendChild(unit);
+    }
+    if (te) te.textContent = time;
+  }
+
+  function updateLiveConnPill(trainId) {
+    if (selectedLiveTrain !== trainId) return;
+    const ws = activeWS[trainId];
+    const pill = document.getElementById('liveConnPill');
+    if (!pill) return;
+    if (ws && ws.readyState === 1) {
+      pill.className = 'status-pill sp-green'; pill.textContent = '● Bağlı';
+    } else {
+      pill.className = 'status-pill sp-gray'; pill.textContent = 'Bağlı Değil';
+    }
+  }
+
+  function selectLiveTrain(id) {
+    selectedLiveTrain = id;
+    updateLiveConnPill(id);
+    const discBtn = document.getElementById('liveDiscBtn');
+    const connBtn = document.getElementById('liveConnBtn');
+    const ws = activeWS[id];
+    if (discBtn) discBtn.style.display = (ws && ws.readyState===1) ? '' : 'none';
+    if (connBtn) connBtn.style.display = (ws && ws.readyState===1) ? 'none' : '';
+  }
+
+  function connectLive() {
+    if (!selectedLiveTrain) { alert('Önce bir tren seçin.'); return; }
+    connectTrain(selectedLiveTrain);
+    setTimeout(() => selectLiveTrain(selectedLiveTrain), 500);
+  }
+
+  function disconnectLive() {
+    if (!selectedLiveTrain) return;
+    disconnectTrain(selectedLiveTrain);
+    selectLiveTrain(selectedLiveTrain);
+  }
+
+  // ─── Ham veri logu ───
+  function logRaw(msg, type='info') {
+    const el = document.getElementById('rawDataLog');
+    if (!el) return;
+    const line = document.createElement('div');
+    line.className = 'conn-log-line ' + type;
+    line.textContent = new Date().toLocaleTimeString('tr-TR') + '  ' + msg;
+    el.appendChild(line);
+    el.scrollTop = el.scrollHeight;
+    if (el.children.length > 200) el.removeChild(el.firstChild);
+  }
+
+  // ─── Bağlantı test ───
+  function testConnection() {
+    const host = document.getElementById('f-host').value.trim();
+    const port = document.getElementById('f-port').value;
+    const proto = document.getElementById('f-proto').value;
+    const log = document.getElementById('connTestLog');
+    if (!log) return;
+    log.style.display = 'block';
+    log.innerHTML = '';
+
+    const addLine = (msg, cls='info') => {
+      const d = document.createElement('div');
+      d.className = 'conn-log-line ' + cls;
+      d.textContent = new Date().toLocaleTimeString('tr-TR') + '  ' + msg;
+      log.appendChild(d);
+      log.scrollTop = log.scrollHeight;
+    };
+
+    addLine(`Bağlantı deneniyor: ${proto}://${host}:${port}`, 'info');
+
+    if (proto === 'ws' || proto === 'wss') {
+      try {
+        const ws = new WebSocket(`${proto}://${host}:${port}`);
+        const t = setTimeout(() => { ws.close(); addLine('⏱ Zaman aşımı (5sn)', 'err'); }, 5000);
+        ws.onopen = () => { clearTimeout(t); addLine('✅ Bağlantı başarılı!', 'ok'); ws.close(); };
+        ws.onerror = () => { clearTimeout(t); addLine('❌ Bağlanamadı — host veya port kontrolünü yapın', 'err'); };
+      } catch(e) { addLine('❌ Hata: ' + e.message, 'err'); }
+    } else {
+      fetch(`${proto}://${host}:${port}/health`)
+        .then(r => addLine(r.ok ? '✅ Sunucu yanıt verdi' : '⚠ Sunucu hata döndü: ' + r.status, r.ok ? 'ok' : 'warn'))
+        .catch(() => addLine('❌ Bağlanamadı', 'err'));
+    }
+  }
+
+  // ─── Map marker güncelle ───
+  function updateMapMarker(trainId, gnss) {
+    // Harita SVG üzerindeki trenin konumunu güncelle (basit simülasyon)
+    // Gerçek implementasyonda Leaflet/Mapbox kullanılabilir
+    const badge = document.querySelector(`text:contains('${trainId}')`);
+    if (badge) {
+      // Bu kısım gerçek harita entegrasyonu için placeholder
+    }
+  }
+
+  // ─── Yardımcı fonksiyonlar ───
+  function toggleKey(id, key) {
+    const el = document.getElementById('ak-' + id);
+    if (!el) return;
+    el.textContent = el.textContent.includes('•') ? key : '•'.repeat(20);
+  }
+  function copyKey(key) {
+    navigator.clipboard.writeText(key).then(() => alert('API Anahtarı kopyalandı!'));
+  }
+  function regenKey(idx) {
+    if (!confirm('API anahtarı yenilenecek. Endüstriyel PC yapılandırmasını da güncellemeniz gerekecek.')) return;
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let key = 'tcdd_';
+    for (let i = 0; i < 32; i++) key += chars[Math.floor(Math.random() * chars.length)];
+    trains[idx].apikey = key;
+    saveTrains();
+    renderApiKeys();
+  }
+  function viewTrainDetail(id) {
+    document.getElementById('liveTrainSelect').value = id;
+    selectLiveTrain(id);
+    setSection('livedata', document.querySelector('.set-menu-item:nth-child(3)'));
+  }
+  function saveConnSettings() { alert('Bağlantı ayarları kaydedildi.'); }
+  function exportConfig() {
+    const blob = new Blob([JSON.stringify({trains}, null, 2)], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'tcdd_config.json';
+    a.click();
+  }
+  function importConfig() {
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = '.json';
+    inp.onchange = e => {
+      const r = new FileReader();
+      r.onload = ev => {
+        try {
+          const cfg = JSON.parse(ev.target.result);
+          if (cfg.trains) { trains = cfg.trains; saveTrains(); renderTrainList(); alert('Yapılandırma yüklendi!'); }
+        } catch { alert('Geçersiz yapılandırma dosyası.'); }
+      };
+      r.readAsText(e.target.files[0]);
+    };
+    inp.click();
+  }
+
+  // ─── Settings section switch ───
+  function setSection(id, el) {
+    document.querySelectorAll('.set-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.set-menu-item').forEach(m => m.classList.remove('active'));
+    const sec = document.getElementById('sec-' + id);
+    if (sec) sec.classList.add('active');
+    if (el) el.classList.add('active');
+  }
+
+  // ─── Protocol tab switch ───
+  function setProtoTab(id, el) {
+    ['ws','rest','mqtt'].forEach(p => {
+      const d = document.getElementById('proto-' + p);
+      if (d) d.style.display = (p === id) ? '' : 'none';
+    });
+    document.querySelectorAll('.proto-tab').forEach(t => t.classList.remove('active'));
+    if (el) el.classList.add('active');
+  }
+
+  // ─── Init settings when page loads ───
+  function initSettings() {
+    renderTrainList();
+  }
+
+  // ─── Sayfa geçişinde settings init ───
+  const _origGoPage = goPage;
+  function goPage(id, tab) {
+    _origGoPage(id, tab);
+    if (id === 'settings') initSettings();
+  }
+
+  // İlk yükleme
+  setTimeout(initSettings, 100);
 
 </script>
 </body>
