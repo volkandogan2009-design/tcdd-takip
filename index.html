@@ -1434,8 +1434,8 @@ asyncio.run(send_telemetry())</textarea>
     document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
     document.getElementById('page-' + id).classList.add('active');
     tab.classList.add('active');
+  if (id === 'settings') setTimeout(initSettings, 50);
   }
-
   // ─── Map: train selection ───
   function selTrain(el, name, route, speed, next, arr, status, state) {
     document.querySelectorAll('.train-item').forEach(i => i.classList.remove('sel'));
@@ -2007,12 +2007,7 @@ asyncio.run(send_telemetry())</textarea>
   }
 
   // ─── Sayfa geçişinde settings init ───
-  const _origGoPage = goPage;
-  function goPage(id, tab) {
-    _origGoPage(id, tab);
-    if (id === 'settings') initSettings();
-  }
-
+// settings init handled in main goPage
   // İlk yükleme
   setTimeout(initSettings, 100);
 
